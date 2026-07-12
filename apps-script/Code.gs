@@ -21,7 +21,7 @@
  * What it stores:
  *   - "_data" (hidden tab): the app's full save file, chunked across
  *     cells. This is the source of truth — don't edit it.
- *   - "Horses 🐴", "Rides 📖", "Goals 🎯", "Wishlist 🌠": readable
+ *   - "Horses 🐴", "Rides 📖", "Goals 🎯", "Wishlist 🌠", "Math 🥕": readable
  *     copies rewritten on every save, so you can browse the barn
  *     right in Google Sheets. Edits here are overwritten — they're a
  *     view, not an input.
@@ -123,6 +123,13 @@ function writeReadableTabs_(ss, d) {
     (d.wishes || []).map(function (w) {
       return [w.text, w.type, w.why, w.granted ? 'YES ⭐' : 'not yet', w.grantedDate || ''];
     }));
+
+  fill_(ss, 'Math 🥕',
+    ['When', 'Game', 'Table', 'First try', 'Retake laps', 'Seconds'],
+    (((d.math || {}).sessions) || []).slice().sort(function (a, b) { return (b.ts || 0) - (a.ts || 0); })
+      .map(function (m) {
+        return [m.ts ? new Date(m.ts) : (m.date || ''), m.mode === 'div' ? 'Division ÷' : 'Multiplication ×', m.table ? m.table + 's' : 'Mix', m.firstTry + ' / ' + m.total, (m.laps || 1) - 1, m.secs || ''];
+      }));
 }
 
 function fill_(ss, name, header, rows) {

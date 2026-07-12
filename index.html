@@ -433,6 +433,30 @@ nav.tabs{display:flex;gap:8px;overflow-x:auto;padding:4px;margin-bottom:20px}
 .mem-card.matched{background:var(--green-soft);border-color:var(--green);transform:scale(.94);cursor:default}
 .mem-card.open{background:var(--card-2)}
 #jump-canvas{width:100%;height:auto;display:block;background:var(--sky-soft);border:2px solid var(--line);border-radius:14px;touch-action:manipulation;cursor:pointer}
+.math-toggle{display:flex;border:2px solid var(--line);border-radius:999px;overflow:hidden;margin:12px 0 10px}
+.math-toggle button{flex:1;border:none;background:var(--card-2);color:var(--ink-soft);font-weight:800;font-size:.95rem;padding:10px 6px;cursor:pointer}
+.math-toggle button.active{background:var(--rose);color:#fff}
+.math-tables{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+.math-tables button{border:2px solid var(--line);background:var(--card-2);color:var(--ink);border-radius:10px;padding:9px 0;font-weight:800;font-size:.92rem;cursor:pointer}
+.math-tables button:hover{border-color:var(--rose)}
+.math-tables button.active{border-color:var(--rose);background:var(--rose-soft);color:var(--rose-deep)}
+.coach-tip{display:flex;align-items:flex-start;gap:8px;width:100%;text-align:left;border:none;background:var(--gold-soft);border-radius:12px;padding:10px 12px;font-size:.88rem;font-weight:700;color:var(--ink);margin:12px 0 0}
+button.coach-tip{cursor:pointer}
+button.coach-tip:hover{box-shadow:0 0 0 2px var(--gold)}
+.math-trail{display:flex;align-items:center;background:var(--green-soft);border-radius:999px;padding:5px 10px;margin:0 0 12px;min-height:34px}
+.math-trail i{flex:1;text-align:center;font-style:normal;font-size:.95rem;color:var(--ink-soft);opacity:.55;line-height:1}
+.math-trail i.done{opacity:1}
+.math-trail i.pony{font-size:1.35rem;opacity:1;transform:scaleX(-1)}
+.math-trail .barn{font-size:1.15rem;margin-left:2px}
+.math-q{font-family:var(--font-display);font-weight:800;font-size:2rem;text-align:center;margin:6px 0 14px}
+.math-blank{color:var(--rose)}
+.math-answer-row{display:flex;gap:10px;justify-content:center}
+#math-answer{width:130px;text-align:center;font-size:1.5rem;font-weight:800;font-family:var(--font-display);border:2px solid var(--line);border-radius:14px;background:var(--card-2);color:var(--ink);padding:8px;appearance:textfield;-moz-appearance:textfield}
+#math-answer::-webkit-outer-spin-button,#math-answer::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+#math-answer:focus{outline:none;border-color:var(--rose)}
+.math-history{display:flex;flex-direction:column;gap:6px}
+.math-hist-row{display:flex;justify-content:space-between;align-items:center;gap:8px;background:var(--card-2);border-radius:10px;padding:7px 10px;font-size:.82rem;font-weight:700;color:var(--ink-soft)}
+.math-hist-row b{color:var(--ink)}
 
 /* ============ stats ============ */
 .stat-card h3{font-size:1.15rem;font-weight:800;margin-bottom:10px}
@@ -759,6 +783,13 @@ footer .data-btns{display:flex;gap:10px;justify-content:center;margin-bottom:10p
         <button class="cta green" id="btn-jump">Play! 🐎</button>
       </div>
       <div class="card fun-card">
+        <h3>🥕 Math Trot</h3>
+        <p class="horse-meta">Trot your pony home by solving × and ÷ facts. Missed cards come back for a retake lap!</p>
+        <p class="chips"><span class="chip green" id="math-chip">Rounds: —</span></p>
+        <p class="horse-meta" id="math-coach-card"></p>
+        <button class="cta" id="btn-math">Practice! 🐴</button>
+      </div>
+      <div class="card fun-card">
         <h3>🎠 Send the pony!</h3>
         <p class="horse-meta">Need a smile? Send a pony galloping across your screen.</p>
         <br>
@@ -990,6 +1021,14 @@ footer .data-btns{display:flex;gap:10px;justify-content:center;margin-bottom:10p
   </div>
 </dialog>
 
+<!-- MATH DIALOG -->
+<dialog id="dlg-math">
+  <div class="dlg-inner">
+    <h2>Math Trot 🥕</h2>
+    <div id="math-body"></div>
+  </div>
+</dialog>
+
 <!-- CARE DIALOG -->
 <dialog id="dlg-care">
   <div class="dlg-inner">
@@ -1170,6 +1209,9 @@ const BADGES=[
   {id:'quiz',    emoji:'🧠', name:'Quiz Whiz',         desc:'Score a perfect 5/5 in the Pony Quiz',  test:s=>(s.games||{}).perfectQuiz>=1},
   {id:'pairs',   emoji:'👀', name:'Sharp Eyes',        desc:'Win Stable Pairs in 12 flips or fewer', test:s=>{const b=(s.games||{}).bestMemory;return b>0&&b<=12}},
   {id:'flyer',   emoji:'🏇', name:'High Flyer',        desc:'Clear 10 fences in one Gallop! run',    test:s=>(s.games||{}).bestJump>=10},
+  {id:'math1',   emoji:'🥕', name:'Carrot Counter',    desc:'Finish your first Math Trot round',     test:s=>((s.math||{}).sessions||[]).length>=1},
+  {id:'math10',  emoji:'🧮', name:'Math Mustang',      desc:'Finish 10 Math Trot rounds',            test:s=>((s.math||{}).sessions||[]).length>=10},
+  {id:'mathace', emoji:'🎓', name:'One-Lap Wonder',    desc:'Get every math card right on the first try', test:s=>((s.math||{}).sessions||[]).some(x=>x.total>0&&x.firstTry>=x.total)},
   {id:'streak3', emoji:'🔥', name:'Hot Streak',        desc:'Ride 3 weeks in a row',                 test:s=>streaks(s).best>=3},
   {id:'streak8', emoji:'🌋', name:'Unstoppable',       desc:'Ride 8 weeks in a row',                 test:s=>streaks(s).best>=8},
   {id:'care5',   emoji:'💕', name:'Best Friend',       desc:'Log 5 care days for your horses',       test:s=>s.horses.reduce((a,h)=>a+(h.care||[]).length,0)>=5},
@@ -1191,6 +1233,8 @@ function normalize(s){
   s.wishes=Array.isArray(s.wishes)?s.wishes:[];
   s.theme=THEMES.some(t=>t.id===s.theme)?s.theme:'party';
   s.games=Object.assign({quizBest:0,perfectQuiz:0,bestMemory:0,bestJump:0},(s.games&&typeof s.games==='object')?s.games:{});
+  const mm=(s.math&&typeof s.math==='object')?s.math:{};
+  s.math={sessions:Array.isArray(mm.sessions)?mm.sessions:[],facts:(mm.facts&&typeof mm.facts==='object'&&!Array.isArray(mm.facts))?mm.facts:{}};
   s.updatedAt=typeof s.updatedAt==='number'?s.updatedAt:0;
   s.events=Array.isArray(s.events)?s.events:[];
   s.horses.forEach(h=>{h.care=Array.isArray(h.care)?h.care:[]});
@@ -1262,6 +1306,9 @@ function render(){
   $('#quiz-best-chip').textContent=state.games.quizBest?`Best: ${state.games.quizBest}/5`:'Best: —';
   $('#mem-best-chip').textContent=state.games.bestMemory?`Best: ${state.games.bestMemory} flips`:'Best: —';
   $('#jump-best-chip').textContent=`Best: ${state.games.bestJump} fence${state.games.bestJump===1?'':'s'}`;
+  const msess=state.math.sessions;
+  $('#math-chip').textContent=msess.length?`Rounds: ${msess.length} · Best: ${Math.max(...msess.map(x=>x.firstTry))}/12 first try`:'Rounds: —';
+  $('#math-coach-card').textContent=`🐴 Coach says: ${mathSuggest().text}`;
 }
 
 function renderGoals(){
@@ -1906,6 +1953,184 @@ jc.addEventListener('pointerdown',e=>{e.preventDefault();jumpInput()});
 document.addEventListener('keydown',e=>{
   if(e.code==='Space'&&$('#dlg-jump').open){e.preventDefault();jumpInput()}
 });
+
+/* ================= games: math trot ================= */
+const MATH_TABLES=[2,3,4,5,6,7,8,9,10,11,12];
+let math=null;                                  // the round being ridden right now
+let mathSetup={mode:'mul',table:0};             // last picked settings (0 = mix)
+const mathKey=(mode,a,k)=>`${mode}:${a}x${k}`;
+const mathModeTxt=m=>m==='div'?'÷':'×';
+
+function mathDeck(mode,table){
+  let pairs;
+  if(table)pairs=shuffle([1,2,3,4,5,6,7,8,9,10,11,12].map(k=>[table,k]));
+  else{
+    const all=[];
+    MATH_TABLES.forEach(a=>{for(let k=1;k<=12;k++)all.push([a,k])});
+    pairs=shuffle(all).slice(0,12);
+  }
+  return pairs.map(([a,k])=>mode==='div'
+    ?{q:`${a*k} ÷ ${a}`,ans:k,key:mathKey('div',a,k)}
+    :{q:`${a} × ${k}`,ans:a*k,key:mathKey('mul',a,k)});
+}
+
+/* Coach Clover looks at every fact ever answered and picks what to practice next:
+   1) a table that's been shaky (under 90% right), else 2) something brand new,
+   else 3) the table that hasn't been ridden in the longest time. */
+function mathSuggest(){
+  const facts=state.math.facts,combos=[];
+  ['mul','div'].forEach(mode=>MATH_TABLES.forEach(table=>{
+    let r=0,w=0,last=0;
+    for(let k=1;k<=12;k++){
+      const f=facts[mathKey(mode,table,k)];
+      if(f){r+=f.r||0;w+=f.w||0;last=Math.max(last,f.last||0)}
+    }
+    combos.push({mode,table,r,w,last,tries:r+w});
+  }));
+  const label=c=>`the ${mathModeTxt(c.mode)} ${c.table}s`;
+  const played=combos.filter(c=>c.tries>0);
+  if(!played.length)return {mode:'mul',table:2,text:'start with the × 2s — an easy trot to warm up!'};
+  const shaky=played.filter(c=>c.w>0&&c.r/c.tries<0.9).sort((a,b)=>a.r/a.tries-b.r/b.tries)[0];
+  if(shaky)return {mode:shaky.mode,table:shaky.table,text:`${label(shaky)} could use a little more hay — practice those next!`};
+  const fresh=combos.filter(c=>!c.tries).sort((a,b)=>a.mode===b.mode?a.table-b.table:(a.mode==='mul'?-1:1))[0];
+  if(fresh)return {mode:fresh.mode,table:fresh.table,text:`time to try something new: ${label(fresh)}!`};
+  const rusty=played.sort((a,b)=>a.last-b.last)[0];
+  return {mode:rusty.mode,table:rusty.table,text:`you're a star ⭐ — give ${label(rusty)} a fresh canter to keep them shiny!`};
+}
+
+const mathWhen=ts=>{const d=new Date(ts);return `${d.toLocaleDateString(undefined,{month:'short',day:'numeric'})} · ${d.toLocaleTimeString([],{hour:'numeric',minute:'2-digit'})}`};
+
+function startMath(){
+  math=null;
+  renderMathSetup();
+  $('#dlg-math').showModal();
+}
+function renderMathSetup(){
+  const s=mathSetup,tip=mathSuggest();
+  const recent=state.math.sessions.slice(-3).reverse();
+  $('#math-body').innerHTML=`
+    <p class="horse-meta">Pick your practice, then trot through 12 cards. Miss one? It comes back for a retake lap until you've rounded them all up! 🤠</p>
+    <div class="math-toggle" role="group" aria-label="fact type">
+      <button type="button" data-mode="mul" class="${s.mode==='mul'?'active':''}">× Multiply</button>
+      <button type="button" data-mode="div" class="${s.mode==='div'?'active':''}">÷ Divide</button>
+    </div>
+    <div class="math-tables">
+      <button type="button" data-table="0" class="${!s.table?'active':''}">Mix 🌾</button>
+      ${MATH_TABLES.map(t=>`<button type="button" data-table="${t}" class="${s.table===t?'active':''}">${t}s</button>`).join('')}
+    </div>
+    <button type="button" class="coach-tip" id="math-take-tip" title="Tap to take Coach's pick">🐴 <span><b>Coach Clover says:</b> ${tip.text}</span></button>
+    ${recent.length?`<p class="quiz-progress" style="margin-top:14px">Your last rounds</p>
+      <div class="math-history">${recent.map(x=>`<div class="math-hist-row"><span>${mathModeTxt(x.mode)} ${x.table?x.table+'s':'Mix'}</span><b>${x.firstTry}/${x.total} first try${x.laps>1?` · ${x.laps-1} retake${x.laps===2?'':'s'}`:''}</b><span>${mathWhen(x.ts)}</span></div>`).join('')}</div>`:''}
+    <div class="dlg-actions">
+      <button class="ghost-btn" type="button" data-close>Not now</button>
+      <button class="cta" id="math-start" type="button">Saddle up! 🏇</button>
+    </div>`;
+  $('#math-body').querySelectorAll('[data-mode]').forEach(b=>b.addEventListener('click',()=>{mathSetup.mode=b.dataset.mode;renderMathSetup()}));
+  $('#math-body').querySelectorAll('[data-table]').forEach(b=>b.addEventListener('click',()=>{mathSetup.table=+b.dataset.table;renderMathSetup()}));
+  $('#math-take-tip').addEventListener('click',()=>{mathSetup={mode:tip.mode,table:tip.table};renderMathSetup()});
+  $('#math-body').querySelector('[data-close]').addEventListener('click',()=>$('#dlg-math').close());
+  $('#math-start').addEventListener('click',beginMathRound);
+}
+
+function beginMathRound(){
+  const deck=mathDeck(mathSetup.mode,mathSetup.table);
+  math={mode:mathSetup.mode,table:mathSetup.table,deck,idx:0,lap:1,missed:[],firstTry:0,total:deck.length,startTs:Date.now(),lock:false};
+  renderMathCard();
+}
+function mathTrailHTML(){
+  const m=math;
+  let out='<div class="math-trail" aria-hidden="true">';
+  for(let i=0;i<m.deck.length;i++){
+    if(i<m.idx)out+=`<i class="done">${m.deck[i]._got?'🥕':'💨'}</i>`;
+    else if(i===m.idx)out+='<i class="pony">🐴</i>';
+    else out+='<i>·</i>';
+  }
+  return out+'<span class="barn">🏡</span></div>';
+}
+function renderMathCard(){
+  const m=math,card=m.deck[m.idx];
+  m.lock=false;
+  $('#math-body').innerHTML=`
+    <p class="quiz-progress">${m.lap>1?`Retake lap ${m.lap-1} · `:''}Card ${m.idx+1} of ${m.deck.length}</p>
+    ${mathTrailHTML()}
+    <p class="math-q">${card.q} = <span class="math-blank">?</span></p>
+    <div class="math-answer-row">
+      <input id="math-answer" type="number" inputmode="numeric" autocomplete="off" aria-label="your answer" placeholder="?">
+      <button class="cta" id="math-go" type="button">Go! 🥕</button>
+    </div>
+    <div id="math-after"></div>`;
+  const inp=$('#math-answer');
+  inp.focus();
+  const submit=()=>{const v=parseInt(inp.value,10);if(!isNaN(v))mathAnswer(v)};
+  $('#math-go').addEventListener('click',submit);
+  inp.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();submit()}});
+}
+function mathAnswer(val){
+  const m=math,card=m.deck[m.idx];
+  if(m.lock)return;m.lock=true;
+  const ok=val===card.ans;
+  card._got=ok;
+  const f=state.math.facts[card.key]||(state.math.facts[card.key]={r:0,w:0,last:0});
+  if(ok)f.r++;else f.w++;
+  f.last=Date.now();
+  if(ok&&m.lap===1)m.firstTry++;
+  if(!ok)m.missed.push(card);
+  $('#math-answer').disabled=true;$('#math-go').disabled=true;
+  if(ok){
+    $('#math-after').innerHTML=`<p class="quiz-explain">🎉 Yes! <b>${card.q} = ${card.ans}</b> — crunch, crunch! 🥕</p>`;
+    confetti(15);
+    setTimeout(()=>{if(math===m)mathNext()},850);
+  }else{
+    $('#math-after').innerHTML=`<p class="quiz-explain">🙊 Not quite — <b>${card.q} = ${card.ans}</b>. That card trots back for the retake lap!</p>
+      <div class="dlg-actions"><button class="cta" id="math-next" type="button">Keep trotting →</button></div>`;
+    $('#math-next').addEventListener('click',mathNext);
+  }
+}
+function mathNext(){
+  const m=math;
+  m.idx++;
+  if(m.idx<m.deck.length)renderMathCard();
+  else if(m.missed.length)renderMathLapEnd();
+  else endMathRound();
+}
+function renderMathLapEnd(){
+  const m=math,n=m.missed.length;
+  $('#math-body').innerHTML=`<div class="quiz-end">
+    <div class="big">🤠</div>
+    <h3>Round-up time!</h3>
+    <p class="horse-meta">${n} card${n===1?'':'s'} got away. Trot back and catch ${n===1?'it':'them'} — that's how the facts stick!</p>
+    <div class="dlg-actions" style="justify-content:center">
+      <button class="cta" id="math-retake" type="button">Retake lap ${m.lap} 🔁</button>
+    </div></div>`;
+  $('#math-retake').addEventListener('click',()=>{
+    m.deck=shuffle(m.missed);m.missed=[];m.idx=0;m.lap++;
+    m.deck.forEach(c=>delete c._got);
+    renderMathCard();
+  });
+}
+function endMathRound(){
+  const m=math;
+  const secs=Math.max(1,Math.round((Date.now()-m.startTs)/1000));
+  state.math.sessions.push({id:uid(),ts:Date.now(),date:todayStr(),mode:m.mode,table:m.table,total:m.total,firstTry:m.firstTry,laps:m.lap,secs});
+  const perfect=m.firstTry===m.total;
+  const tip=mathSuggest();
+  const timeTxt=secs>=60?`${Math.floor(secs/60)}m ${secs%60}s`:`${secs}s`;
+  $('#math-body').innerHTML=`<div class="quiz-end">
+    <div class="big">${perfect?'🏆':'🌟'}</div>
+    <h3>${perfect?'PERFECT trot!':'All cards rounded up!'}</h3>
+    <p class="horse-meta">${mathModeTxt(m.mode)} ${m.table?m.table+'s':'Mix'} · ${m.firstTry} of ${m.total} on the first try${m.lap>1?` · ${m.lap-1} retake lap${m.lap===2?'':'s'}`:''} · ${timeTxt}</p>
+    <p class="horse-meta">${perfect?'Your pony is stuffed with carrots and SO proud of you! 🥕🐴':'Every missed card got caught on the retake — that’s how champions learn! 💪🐴'}</p>
+    <div class="coach-tip">🐴 <span><b>Next up:</b> ${tip.text}</span></div>
+    <div class="dlg-actions" style="justify-content:center">
+      <button class="ghost-btn" data-close type="button">Done</button>
+      <button class="cta" id="math-again" type="button">Ride again! 🔄</button>
+    </div></div>`;
+  $('#math-body').querySelector('[data-close]').addEventListener('click',()=>$('#dlg-math').close());
+  $('#math-again').addEventListener('click',renderMathSetup);
+  confetti(perfect?140:80);
+  persist();render();checkNewBadges();
+}
+$('#btn-math').addEventListener('click',startMath);
 
 /* ================= horse profile page ================= */
 let currentHorsePage=null;
