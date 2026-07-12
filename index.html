@@ -434,7 +434,7 @@ nav.tabs{display:flex;gap:8px;overflow-x:auto;padding:4px;margin-bottom:20px}
 .mem-card.open{background:var(--card-2)}
 #jump-canvas{width:100%;height:auto;display:block;background:var(--sky-soft);border:2px solid var(--line);border-radius:14px;touch-action:manipulation;cursor:pointer}
 .math-toggle{display:flex;border:2px solid var(--line);border-radius:999px;overflow:hidden;margin:12px 0 10px}
-.math-toggle button{flex:1;border:none;background:var(--card-2);color:var(--ink-soft);font-weight:800;font-size:.95rem;padding:10px 6px;cursor:pointer}
+.math-toggle button{flex:1;border:none;background:var(--card-2);color:var(--ink-soft);font-weight:800;font-size:.85rem;padding:10px 2px;white-space:nowrap;cursor:pointer}
 .math-toggle button.active{background:var(--rose);color:#fff}
 .math-tables{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
 .math-tables button{border:2px solid var(--line);background:var(--card-2);color:var(--ink);border-radius:10px;padding:9px 0;font-weight:800;font-size:.92rem;cursor:pointer}
@@ -784,7 +784,7 @@ footer .data-btns{display:flex;gap:10px;justify-content:center;margin-bottom:10p
       </div>
       <div class="card fun-card">
         <h3>🥕 Math Trot</h3>
-        <p class="horse-meta">Trot your pony home by solving × and ÷ facts. Missed cards come back for a retake lap!</p>
+        <p class="horse-meta">Trot your pony home by solving ×, ÷, + and − facts. Missed cards come back for a retake lap!</p>
         <p class="chips"><span class="chip green" id="math-chip">Rounds: —</span></p>
         <p class="horse-meta" id="math-coach-card"></p>
         <button class="cta" id="btn-math">Practice! 🐴</button>
@@ -1956,11 +1956,25 @@ document.addEventListener('keydown',e=>{
 
 /* ================= games: math trot ================= */
 const MATH_TABLES=[2,3,4,5,6,7,8,9,10,11,12];
+const MATH_MODES=[                              // the four gaits of math
+  {id:'mul',sym:'×',name:'Times'},
+  {id:'div',sym:'÷',name:'Divide'},
+  {id:'add',sym:'+',name:'Add'},
+  {id:'sub',sym:'−',name:'Minus'}
+];
 let math=null;                                  // the round being ridden right now
 let mathSetup={mode:'mul',table:0};             // last picked settings (0 = mix)
 const mathKey=(mode,a,k)=>`${mode}:${a}x${k}`;
-const mathModeTxt=m=>m==='div'?'÷':'×';
+const mathModeTxt=m=>(MATH_MODES.find(x=>x.id===m)||MATH_MODES[0]).sym;
 
+/* Picking the "4s" means: ×4 facts, ÷4 facts, +4 facts, or −4 facts —
+   every mode is the same 12-card trot, just a different gait. */
+function mathCard(mode,a,k){
+  if(mode==='div')return {q:`${a*k} ÷ ${a}`,ans:k,key:mathKey('div',a,k)};
+  if(mode==='add')return {q:`${a} + ${k}`,ans:a+k,key:mathKey('add',a,k)};
+  if(mode==='sub')return {q:`${a+k} − ${a}`,ans:k,key:mathKey('sub',a,k)};
+  return {q:`${a} × ${k}`,ans:a*k,key:mathKey('mul',a,k)};
+}
 function mathDeck(mode,table){
   let pairs;
   if(table)pairs=shuffle([1,2,3,4,5,6,7,8,9,10,11,12].map(k=>[table,k]));
@@ -1969,9 +1983,7 @@ function mathDeck(mode,table){
     MATH_TABLES.forEach(a=>{for(let k=1;k<=12;k++)all.push([a,k])});
     pairs=shuffle(all).slice(0,12);
   }
-  return pairs.map(([a,k])=>mode==='div'
-    ?{q:`${a*k} ÷ ${a}`,ans:k,key:mathKey('div',a,k)}
-    :{q:`${a} × ${k}`,ans:a*k,key:mathKey('mul',a,k)});
+  return pairs.map(([a,k])=>mathCard(mode,a,k));
 }
 
 /* Coach Clover looks at every fact ever answered and picks what to practice next:
@@ -1979,7 +1991,7 @@ function mathDeck(mode,table){
    else 3) the table that hasn't been ridden in the longest time. */
 function mathSuggest(){
   const facts=state.math.facts,combos=[];
-  ['mul','div'].forEach(mode=>MATH_TABLES.forEach(table=>{
+  MATH_MODES.forEach(({id:mode})=>MATH_TABLES.forEach(table=>{
     let r=0,w=0,last=0;
     for(let k=1;k<=12;k++){
       const f=facts[mathKey(mode,table,k)];
@@ -1989,10 +2001,11 @@ function mathSuggest(){
   }));
   const label=c=>`the ${mathModeTxt(c.mode)} ${c.table}s`;
   const played=combos.filter(c=>c.tries>0);
-  if(!played.length)return {mode:'mul',table:2,text:'start with the × 2s — an easy trot to warm up!'};
+  if(!played.length)return {mode:'add',table:2,text:'start with the + 2s — an easy trot to warm up!'};
   const shaky=played.filter(c=>c.w>0&&c.r/c.tries<0.9).sort((a,b)=>a.r/a.tries-b.r/b.tries)[0];
   if(shaky)return {mode:shaky.mode,table:shaky.table,text:`${label(shaky)} could use a little more hay — practice those next!`};
-  const fresh=combos.filter(c=>!c.tries).sort((a,b)=>a.mode===b.mode?a.table-b.table:(a.mode==='mul'?-1:1))[0];
+  const modeRank=m=>MATH_MODES.findIndex(x=>x.id===m);
+  const fresh=combos.filter(c=>!c.tries).sort((a,b)=>a.mode===b.mode?a.table-b.table:modeRank(a.mode)-modeRank(b.mode))[0];
   if(fresh)return {mode:fresh.mode,table:fresh.table,text:`time to try something new: ${label(fresh)}!`};
   const rusty=played.sort((a,b)=>a.last-b.last)[0];
   return {mode:rusty.mode,table:rusty.table,text:`you're a star ⭐ — give ${label(rusty)} a fresh canter to keep them shiny!`};
@@ -2008,11 +2021,12 @@ function startMath(){
 function renderMathSetup(){
   const s=mathSetup,tip=mathSuggest();
   const recent=state.math.sessions.slice(-3).reverse();
+  const carrots=Object.values(state.math.facts).reduce((a,f)=>a+(f.r||0),0);
   $('#math-body').innerHTML=`
     <p class="horse-meta">Pick your practice, then trot through 12 cards. Miss one? It comes back for a retake lap until you've rounded them all up! 🤠</p>
+    ${carrots?`<p class="chips"><span class="chip green">🥕 ${carrots} carrot${carrots===1?'':'s'} munched</span><span class="chip gold">🏇 ${state.math.sessions.length} round${state.math.sessions.length===1?'':'s'} ridden</span></p>`:''}
     <div class="math-toggle" role="group" aria-label="fact type">
-      <button type="button" data-mode="mul" class="${s.mode==='mul'?'active':''}">× Multiply</button>
-      <button type="button" data-mode="div" class="${s.mode==='div'?'active':''}">÷ Divide</button>
+      ${MATH_MODES.map(x=>`<button type="button" data-mode="${x.id}" class="${s.mode===x.id?'active':''}">${x.sym} ${x.name}</button>`).join('')}
     </div>
     <div class="math-tables">
       <button type="button" data-table="0" class="${!s.table?'active':''}">Mix 🌾</button>
@@ -2111,14 +2125,20 @@ function renderMathLapEnd(){
 function endMathRound(){
   const m=math;
   const secs=Math.max(1,Math.round((Date.now()-m.startTs)/1000));
-  state.math.sessions.push({id:uid(),ts:Date.now(),date:todayStr(),mode:m.mode,table:m.table,total:m.total,firstTry:m.firstTry,laps:m.lap,secs});
   const perfect=m.firstTry===m.total;
+  // fastest-ever PERFECT ride of this exact practice (mode + table)?
+  const prevBest=state.math.sessions
+    .filter(x=>x.mode===m.mode&&x.table===m.table&&x.firstTry===x.total)
+    .reduce((a,x)=>Math.min(a,x.secs||Infinity),Infinity);
+  const newBest=perfect&&secs<prevBest;
+  state.math.sessions.push({id:uid(),ts:Date.now(),date:todayStr(),mode:m.mode,table:m.table,total:m.total,firstTry:m.firstTry,laps:m.lap,secs});
   const tip=mathSuggest();
   const timeTxt=secs>=60?`${Math.floor(secs/60)}m ${secs%60}s`:`${secs}s`;
   $('#math-body').innerHTML=`<div class="quiz-end">
     <div class="big">${perfect?'🏆':'🌟'}</div>
     <h3>${perfect?'PERFECT trot!':'All cards rounded up!'}</h3>
     <p class="horse-meta">${mathModeTxt(m.mode)} ${m.table?m.table+'s':'Mix'} · ${m.firstTry} of ${m.total} on the first try${m.lap>1?` · ${m.lap-1} retake lap${m.lap===2?'':'s'}`:''} · ${timeTxt}</p>
+    ${newBest?`<p class="chips" style="justify-content:center"><span class="chip gold">⚡ New best time for ${mathModeTxt(m.mode)} ${m.table?m.table+'s':'Mix'}${isFinite(prevBest)?` — beat ${prevBest}s!`:'!'}</span></p>`:''}
     <p class="horse-meta">${perfect?'Your pony is stuffed with carrots and SO proud of you! 🥕🐴':'Every missed card got caught on the retake — that’s how champions learn! 💪🐴'}</p>
     <div class="coach-tip">🐴 <span><b>Next up:</b> ${tip.text}</span></div>
     <div class="dlg-actions" style="justify-content:center">

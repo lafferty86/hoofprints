@@ -124,11 +124,12 @@ function writeReadableTabs_(ss, d) {
       return [w.text, w.type, w.why, w.granted ? 'YES ⭐' : 'not yet', w.grantedDate || ''];
     }));
 
+  var MATH_GAMES = { mul: 'Multiplication ×', div: 'Division ÷', add: 'Addition +', sub: 'Subtraction −' };
   fill_(ss, 'Math 🥕',
     ['When', 'Game', 'Table', 'First try', 'Retake laps', 'Seconds'],
     (((d.math || {}).sessions) || []).slice().sort(function (a, b) { return (b.ts || 0) - (a.ts || 0); })
       .map(function (m) {
-        return [m.ts ? new Date(m.ts) : (m.date || ''), m.mode === 'div' ? 'Division ÷' : 'Multiplication ×', m.table ? m.table + 's' : 'Mix', m.firstTry + ' / ' + m.total, (m.laps || 1) - 1, m.secs || ''];
+        return [m.ts ? new Date(m.ts) : (m.date || ''), MATH_GAMES[m.mode] || m.mode, m.table ? m.table + 's' : 'Mix', m.firstTry + ' / ' + m.total, (m.laps || 1) - 1, m.secs || ''];
       }));
 }
 
