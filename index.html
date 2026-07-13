@@ -554,8 +554,18 @@ dialog::backdrop{background:rgba(60,35,20,.45);backdrop-filter:blur(3px)}
 .empty p{color:var(--ink-soft);font-weight:700;margin:0 0 16px}
 
 /* ============ theme picker ============ */
-#btn-theme{margin-left:auto;align-self:flex-start}
-#btn-sync{align-self:flex-start}
+.settings-wrap{margin-left:auto;align-self:flex-start;position:relative}
+#settings-menu{
+  position:absolute;right:0;top:calc(100% + 8px);z-index:60;
+  background:var(--card);border:2px solid var(--line);border-radius:16px;
+  box-shadow:var(--shadow-lift);padding:6px;display:flex;flex-direction:column;gap:2px;min-width:190px;
+}
+.menu-item{
+  display:flex;align-items:center;gap:10px;border:none;background:none;color:var(--ink);
+  font-weight:800;font-size:.95rem;padding:10px 12px;border-radius:12px;text-align:left;cursor:pointer;white-space:nowrap;
+}
+.menu-item span{font-size:1.1rem}
+.menu-item:hover{background:var(--rose-soft);color:var(--rose-deep)}
 .sync-status{font-size:.85rem;font-weight:700;color:var(--ink-soft);margin:10px 0 0;min-height:1.3em}
 .sync-note{font-size:.85rem;color:var(--ink-soft);font-weight:700;margin:0 0 12px}
 .sync-note a{color:var(--rose)}
@@ -626,9 +636,14 @@ footer .data-btns{display:flex;gap:10px;justify-content:center;margin-bottom:10p
       <h1>Hoof<span class="pink">prints</span></h1>
       <p class="tagline">The barn book of <button id="rider-btn" title="Change rider name">…</button> ✨</p>
     </div>
-    <button class="mini-btn" id="btn-theme">🎨 Theme</button>
-    <button class="mini-btn" id="btn-sync">☁️ Sync</button>
-    <button class="mini-btn" id="btn-lock">🔒 Lock</button>
+    <div class="settings-wrap">
+      <button class="mini-btn" id="btn-settings" aria-haspopup="true" aria-expanded="false">⚙️ Settings</button>
+      <div class="menu" id="settings-menu" hidden>
+        <button class="menu-item" id="btn-theme"><span>🎨</span> Theme</button>
+        <button class="menu-item" id="btn-sync"><span>☁️</span> Cloud sync</button>
+        <button class="menu-item" id="btn-lock"><span>🔒</span> Barn lock</button>
+      </div>
+    </div>
   </header>
 
   <div class="stats" aria-label="My totals">
@@ -1804,6 +1819,25 @@ function sendPony(){
   const p=$('#pony');
   p.classList.remove('gallop');void p.offsetWidth;p.classList.add('gallop');
 }
+
+/* ================= settings menu ================= */
+$('#btn-settings').addEventListener('click',e=>{
+  e.stopPropagation();
+  const m=$('#settings-menu');
+  m.hidden=!m.hidden;
+  $('#btn-settings').setAttribute('aria-expanded',String(!m.hidden));
+});
+document.addEventListener('click',e=>{
+  if(!e.target.closest('.settings-wrap')){
+    $('#settings-menu').hidden=true;
+    $('#btn-settings').setAttribute('aria-expanded','false');
+  }
+});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){$('#settings-menu').hidden=true;$('#btn-settings').setAttribute('aria-expanded','false')}});
+document.querySelectorAll('.menu-item').forEach(b=>b.addEventListener('click',()=>{
+  $('#settings-menu').hidden=true;
+  $('#btn-settings').setAttribute('aria-expanded','false');
+}));
 
 /* ================= themes ================= */
 function applyTheme(id){
