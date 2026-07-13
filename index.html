@@ -1637,6 +1637,10 @@ function renderBadges(){
 function switchTab(name){
   document.querySelectorAll('.tab').forEach(t=>t.setAttribute('aria-selected',String(t.dataset.tab===name)));
   document.querySelectorAll('[role=tabpanel]').forEach(p=>p.hidden=(p.id!=='panel-'+name));
+  try{
+    if(name==='horse')localStorage.setItem('hoofprints-tab',JSON.stringify({tab:'horse',horse:currentHorsePage}));
+    else localStorage.setItem('hoofprints-tab',JSON.stringify({tab:name}));
+  }catch(e){}
 }
 document.querySelectorAll('.tab').forEach(t=>t.addEventListener('click',()=>switchTab(t.dataset.tab)));
 document.querySelectorAll('.stat[data-goto]').forEach(el=>{
@@ -2812,6 +2816,11 @@ $('#file-import').addEventListener('change',e=>{
 /* ================= first-run sparkle ================= */
 applyTheme(state.theme);
 render();
+try{
+  const saved=JSON.parse(localStorage.getItem('hoofprints-tab'));
+  if(saved&&saved.tab==='horse'&&saved.horse&&horseById(saved.horse))openHorsePage(saved.horse);
+  else if(saved&&document.getElementById('panel-'+saved.tab))switchTab(saved.tab);
+}catch(e){}
 if(!state.horses.length&&!state.rides.length){setTimeout(sendPony,800)}
 </script>
 <!--APP-END-->
