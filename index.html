@@ -2818,8 +2818,11 @@ applyTheme(state.theme);
 render();
 try{
   const saved=JSON.parse(localStorage.getItem('hoofprints-tab'));
-  if(saved&&saved.tab==='horse'&&saved.horse&&horseById(saved.horse))openHorsePage(saved.horse);
-  else if(saved&&document.getElementById('panel-'+saved.tab))switchTab(saved.tab);
+  if(saved&&saved.tab==='horse')fixed: {
+    if(saved.horse&&horseById(saved.horse))openHorsePage(saved.horse);
+    else switchTab('stable');
+  }
+  else if(saved&&saved.tab!=='horse'&&document.getElementById('panel-'+saved.tab))switchTab(saved.tab);
 }catch(e){}
 if(!state.horses.length&&!state.rides.length){setTimeout(sendPony,800)}
 </script>
