@@ -229,7 +229,7 @@ button{font-family:inherit;cursor:pointer}
 input,select,textarea{font-family:inherit;font-size:1rem;color:var(--ink)}
 :focus-visible{outline:3px solid var(--sky);outline-offset:2px;border-radius:6px}
 
-.wrap{max-width:960px;margin:0 auto;padding:20px 16px 120px}
+.wrap{max-width:1060px;margin:0 auto;padding:20px 16px 120px}
 
 /* ============ header ============ */
 header{display:flex;flex-wrap:wrap;align-items:center;gap:14px;margin:8px 0 18px}
@@ -306,16 +306,26 @@ header{display:flex;flex-wrap:wrap;align-items:center;gap:14px;margin:8px 0 18px
 .horse-card .horse-head{cursor:pointer;border-radius:12px}
 .horse-card .horse-head:hover h3{color:var(--rose);text-decoration:underline wavy var(--rose) 2px;text-underline-offset:4px}
 
-/* ============ tabs ============ */
-nav.tabs{display:flex;gap:8px;overflow-x:auto;padding:4px;margin-bottom:20px}
+/* ============ tabs (sidebar on wide screens, grid on small) ============ */
+.layout{display:grid;grid-template-columns:196px minmax(0,1fr);gap:20px;align-items:start}
+nav.tabs{display:flex;flex-direction:column;gap:7px;position:sticky;top:14px}
 .tab{
+  display:flex;align-items:center;gap:12px;text-align:left;
   border:2px solid var(--line);background:var(--card);color:var(--ink-soft);
-  font-family:var(--font-display);font-weight:600;font-size:1.05rem;
-  padding:9px 18px;border-radius:999px;white-space:nowrap;box-shadow:var(--shadow);
+  font-family:var(--font-display);font-weight:600;font-size:1.02rem;
+  padding:10px 14px;border-radius:16px;box-shadow:var(--shadow);
   transition:transform .12s ease;
 }
-.tab:hover{transform:translateY(-2px)}
+.tab .emo{font-size:1.25rem;line-height:1;flex:0 0 auto}
+.tab:hover{transform:translateX(3px)}
 .tab[aria-selected="true"]{background:var(--rose);border-color:var(--rose);color:#fff}
+@media (max-width:760px){
+  .layout{display:block}
+  nav.tabs{position:static;display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin-bottom:18px}
+  .tab{flex-direction:column;gap:3px;padding:9px 2px;font-size:.7rem;border-radius:14px;text-align:center;letter-spacing:.01em}
+  .tab .emo{font-size:1.35rem}
+  .tab:hover{transform:translateY(-2px)}
+}
 
 /* ============ cards & grids ============ */
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:14px}
@@ -628,16 +638,18 @@ footer .data-btns{display:flex;gap:10px;justify-content:center;margin-bottom:10p
     <div class="stat" role="button" tabindex="0" data-goto="badges"><b id="stat-badges">0</b><span>Badges</span></div>
   </div>
 
+  <div class="layout">
   <nav class="tabs" role="tablist" aria-label="Sections">
-    <button class="tab" role="tab" data-tab="stable"  aria-selected="true">🐴 My Stable</button>
-    <button class="tab" role="tab" data-tab="journal" aria-selected="false">📖 Ride Journal</button>
-    <button class="tab" role="tab" data-tab="cal"     aria-selected="false">🗓️ Calendar</button>
-    <button class="tab" role="tab" data-tab="stats"   aria-selected="false">📊 Stats</button>
-    <button class="tab" role="tab" data-tab="goals"   aria-selected="false">🎯 My Goals</button>
-    <button class="tab" role="tab" data-tab="wishes"  aria-selected="false">🌠 Wishlist</button>
-    <button class="tab" role="tab" data-tab="badges"  aria-selected="false">🏅 Badges</button>
-    <button class="tab" role="tab" data-tab="fun"     aria-selected="false">✨ Fun Stuff</button>
+    <button class="tab" role="tab" data-tab="stable"  aria-selected="true"><span class="emo">🐴</span><span>My Stable</span></button>
+    <button class="tab" role="tab" data-tab="journal" aria-selected="false"><span class="emo">📖</span><span>Journal</span></button>
+    <button class="tab" role="tab" data-tab="cal"     aria-selected="false"><span class="emo">🗓️</span><span>Calendar</span></button>
+    <button class="tab" role="tab" data-tab="stats"   aria-selected="false"><span class="emo">📊</span><span>Stats</span></button>
+    <button class="tab" role="tab" data-tab="goals"   aria-selected="false"><span class="emo">🎯</span><span>Goals</span></button>
+    <button class="tab" role="tab" data-tab="wishes"  aria-selected="false"><span class="emo">🌠</span><span>Wishlist</span></button>
+    <button class="tab" role="tab" data-tab="badges"  aria-selected="false"><span class="emo">🏅</span><span>Badges</span></button>
+    <button class="tab" role="tab" data-tab="fun"     aria-selected="false"><span class="emo">✨</span><span>Fun Stuff</span></button>
   </nav>
+  <main class="panels">
 
   <!-- STABLE -->
   <section id="panel-stable" role="tabpanel">
@@ -788,6 +800,9 @@ footer .data-btns{display:flex;gap:10px;justify-content:center;margin-bottom:10p
       </div>
     </div>
   </section>
+
+  </main>
+  </div>
 
   <footer>
     <div class="data-btns">
@@ -1084,8 +1099,13 @@ footer .data-btns{display:flex;gap:10px;justify-content:center;margin-bottom:10p
       <label class="plain-check"><input type="checkbox" id="sync-auto"> Auto-save to the cloud after every change</label>
     </div>
     <p class="sync-status" id="sync-status"></p>
-    <div class="dlg-actions">
+    <div class="field" id="setup-link-wrap" hidden>
+      <label for="setup-link-out">Setup link — open it on another device and sync is ready. Share privately!</label>
+      <input type="text" id="setup-link-out" readonly>
+    </div>
+    <div class="dlg-actions" style="flex-wrap:wrap">
       <button type="button" class="ghost-btn" data-close>Close</button>
+      <button type="button" class="mini-btn" id="sync-link" style="align-self:center">🔗 Copy setup link</button>
       <button type="button" class="cta green" id="sync-pull">⬇ Get from cloud</button>
       <button type="button" class="cta" id="sync-push">⬆ Send to cloud</button>
     </div>
@@ -2514,6 +2534,32 @@ function openSyncDialog(){
 }
 $('#btn-sync').addEventListener('click',()=>requirePass(openSyncDialog));
 $('#sync-push').addEventListener('click',()=>{readSyncForm();pushCloud(true)});
+$('#sync-link').addEventListener('click',()=>{
+  readSyncForm();
+  if(!syncCfg.url){toast('Add the web app URL first ☁️');return}
+  const payload=btoa(encodeURIComponent(JSON.stringify({u:syncCfg.url,s:syncCfg.secret})));
+  const link=location.origin.startsWith('http')?location.origin+location.pathname+'#setup='+payload:'https://lafferty86.github.io/hoofprints/#setup='+payload;
+  $('#setup-link-wrap').hidden=false;
+  $('#setup-link-out').value=link;
+  $('#setup-link-out').select();
+  if(navigator.clipboard&&navigator.clipboard.writeText){
+    navigator.clipboard.writeText(link).then(()=>toast('Setup link copied! Send it to her other devices 📱')).catch(()=>toast('Copy the link from the box below 👇'));
+  }else toast('Copy the link from the box below 👇');
+});
+// consume a #setup= link: configure sync on this device, then clean the address bar
+(function(){
+  const m=location.hash.match(/#setup=(.+)/);
+  if(!m)return;
+  try{
+    const cfg=JSON.parse(decodeURIComponent(atob(m[1])));
+    if(cfg&&typeof cfg.u==='string'&&cfg.u.startsWith('https://')){
+      syncCfg.url=cfg.u;syncCfg.secret=String(cfg.s||'');syncCfg.auto=true;
+      saveSyncCfg();
+      toast('Cloud sync set up from your link! ☁️✨');
+    }
+  }catch(e){}
+  try{history.replaceState(null,'',location.pathname+location.search)}catch(e){}
+})();
 $('#sync-pull').addEventListener('click',()=>{readSyncForm();pullCloud(true)});
 $('#dlg-sync').addEventListener('close',readSyncForm);
 // on startup: quietly pull if this device is empty, or nudge if the cloud is newer

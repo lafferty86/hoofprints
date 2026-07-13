@@ -55,7 +55,7 @@ Hoofprints works fully offline, but you can optionally back the whole barn with 
 
 **What you get:**
 - Every change auto-saves to the Sheet a couple of seconds later
-- Open the app on a new device, enter the same URL + secret, and the barn loads automatically
+- Open the app on a new device, enter the same URL + secret, and the barn loads automatically — or easier: on an already-connected device open ☁️ Sync → **🔗 Copy setup link** and just open that link on the new device (share it privately; it contains the URL and secret)
 - The Sheet gets human-readable tabs — **Horses 🐴, Rides 📖, Goals 🎯, Care 🩺, Calendar 🗓️, Wishlist 🌠** — rewritten on every save (the hidden `_data` tab is the real save file; don't edit it)
 - The secret word keeps random strangers out; treat the URL + secret like a house key
 
