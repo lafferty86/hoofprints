@@ -59,6 +59,8 @@ Hoofprints works fully offline, but you can optionally back the whole barn with 
 - The Sheet gets human-readable tabs — **Horses 🐴, Rides 📖, Goals 🎯, Care 🩺, Calendar 🗓️, Wishlist 🌠** — rewritten on every save (the hidden `_data` tab is the real save file; don't edit it)
 - The secret word keeps random strangers out; treat the URL + secret like a house key
 
+**Barn lock 🔒 (optional):** the Lock button in the app sets a per-device passcode. With it on, the app asks for the passcode every time it opens, and the ☁️ Sync settings can't be viewed or changed without it. It's a deterrent lock, not encryption — and if the passcode is forgotten, clearing the site's data in the browser removes the lock (cloud sync restores the barn).
+
 If sync isn't set up, everything keeps working exactly as before — saved on the device, with file backup buttons in the footer.
 
 Made with 💗 and hay.

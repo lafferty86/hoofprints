@@ -561,6 +561,17 @@ dialog::backdrop{background:rgba(60,35,20,.45);backdrop-filter:blur(3px)}
 .theme-name{font-family:var(--font-display);font-weight:800;font-size:1.05rem;display:block}
 .theme-desc{font-size:.82rem;color:var(--ink-soft);font-weight:700;margin:0}
 
+/* ============ barn lock ============ */
+#lock-screen{position:fixed;inset:0;z-index:100;background:var(--paper);display:grid;place-items:center;padding:20px}
+.lock-card{text-align:center;max-width:340px;width:100%;display:flex;flex-direction:column;gap:12px;align-items:center}
+.lock-card h2{font-size:1.8rem;font-weight:800}
+.lock-card p{margin:0;color:var(--ink-soft);font-weight:700}
+.lock-card input{width:100%;border:2px solid var(--line);border-radius:14px;padding:12px;font-size:1.3rem;text-align:center;letter-spacing:.3em;background:var(--card)}
+.lock-hint{font-size:.78rem !important;line-height:1.4}
+.shake{animation:shake .4s}
+@keyframes shake{0%,100%{transform:translateX(0)}20%,60%{transform:translateX(-8px)}40%,80%{transform:translateX(8px)}}
+[hidden]{display:none !important}
+
 /* ============ toast & confetti & pony ============ */
 #toast{
   position:fixed;left:50%;bottom:24px;transform:translateX(-50%) translateY(120px);
@@ -607,6 +618,7 @@ footer .data-btns{display:flex;gap:10px;justify-content:center;margin-bottom:10p
     </div>
     <button class="mini-btn" id="btn-theme">🎨 Theme</button>
     <button class="mini-btn" id="btn-sync">☁️ Sync</button>
+    <button class="mini-btn" id="btn-lock">🔒 Lock</button>
   </header>
 
   <div class="stats" aria-label="My totals">
@@ -1066,7 +1078,7 @@ footer .data-btns{display:flex;gap:10px;justify-content:center;margin-bottom:10p
     </div>
     <div class="field">
       <label for="sync-secret">Secret word</label>
-      <input type="text" id="sync-secret" placeholder="the SECRET from the script">
+      <input type="password" id="sync-secret" autocomplete="off" placeholder="the SECRET from the script">
     </div>
     <div class="field">
       <label class="plain-check"><input type="checkbox" id="sync-auto"> Auto-save to the cloud after every change</label>
@@ -1086,6 +1098,26 @@ footer .data-btns{display:flex;gap:10px;justify-content:center;margin-bottom:10p
     <h2>Pick your look 🎨</h2>
     <div id="theme-list" class="theme-list" role="radiogroup" aria-label="Theme"></div>
     <div class="dlg-actions"><button class="cta" data-close>Done!</button></div>
+  </div>
+</dialog>
+
+<!-- LOCK SCREEN -->
+<div id="lock-screen" hidden>
+  <div class="lock-card">
+    <div class="rosette" aria-hidden="true">🔒</div>
+    <h2>Whoa there! 🐴</h2>
+    <p>Enter the barn passcode to come in</p>
+    <input type="password" id="lock-input" autocomplete="off" aria-label="Barn passcode">
+    <button class="cta" id="lock-go">Open the barn 🚪</button>
+    <p class="lock-hint">Forgot it? A grown-up can clear this site's data in the browser settings — if ☁️ Cloud sync is set up, the whole barn comes right back.</p>
+  </div>
+</div>
+
+<!-- LOCK DIALOG -->
+<dialog id="dlg-lock">
+  <div class="dlg-inner">
+    <h2 id="lock-dlg-title">Barn lock 🔒</h2>
+    <div id="lock-body"></div>
   </div>
 </dialog>
 
@@ -2293,6 +2325,125 @@ $('#care-add').addEventListener('click',()=>{
   toast(`Care day added for ${h.name} 💕`);
 });
 
+/* ================= barn lock ================= */
+const LOCK_KEY='hoofprints-lock';
+let lockCfg=null;
+try{const c=JSON.parse(localStorage.getItem(LOCK_KEY));if(c&&c.salt&&c.hash)lockCfg=c}catch(e){}
+async function hashPass(pass,salt){
+  const bytes=new TextEncoder().encode(salt+'|'+pass);
+  if(crypto&&crypto.subtle){
+    const h=await crypto.subtle.digest('SHA-256',bytes);
+    return [...new Uint8Array(h)].map(b=>b.toString(16).padStart(2,'0')).join('');
+  }
+  let h=5381;for(const b of bytes)h=((h*33)^b)>>>0;
+  return 'x'+h.toString(16);
+}
+async function checkPass(pass){return !!lockCfg&&(await hashPass(pass,lockCfg.salt))===lockCfg.hash}
+function saveLockCfg(){
+  try{
+    if(lockCfg)localStorage.setItem(LOCK_KEY,JSON.stringify(lockCfg));
+    else localStorage.removeItem(LOCK_KEY);
+  }catch(e){}
+}
+function showLockScreen(){
+  $('#lock-screen').hidden=false;
+  $('#lock-input').value='';
+  setTimeout(()=>$('#lock-input').focus(),50);
+}
+async function tryUnlock(){
+  if(await checkPass($('#lock-input').value)){
+    try{sessionStorage.setItem('hoofprints-unlocked','1')}catch(e){}
+    $('#lock-screen').hidden=true;
+    confetti(30);
+  }else{
+    const card=document.querySelector('.lock-card');
+    card.classList.remove('shake');void card.offsetWidth;card.classList.add('shake');
+    $('#lock-input').value='';$('#lock-input').focus();
+  }
+}
+$('#lock-go').addEventListener('click',tryUnlock);
+$('#lock-input').addEventListener('keydown',e=>{if(e.key==='Enter')tryUnlock()});
+let unlockedThisSession=false;
+try{unlockedThisSession=sessionStorage.getItem('hoofprints-unlocked')==='1'}catch(e){}
+if(lockCfg&&!unlockedThisSession)showLockScreen();
+
+// ask for the passcode before running a protected action (no-op when no lock set)
+function requirePass(then){
+  if(!lockCfg){then();return}
+  $('#lock-dlg-title').textContent='Grown-up check 🔒';
+  $('#lock-body').innerHTML=`
+    <div class="field"><label for="lk-verify">Barn passcode</label><input type="password" id="lk-verify" autocomplete="off"></div>
+    <div class="dlg-actions">
+      <button type="button" class="ghost-btn" data-close>Never mind</button>
+      <button type="button" class="cta" id="lk-verify-go">Continue →</button>
+    </div>`;
+  wireLockClose();
+  const go=async()=>{
+    if(await checkPass($('#lk-verify').value)){$('#dlg-lock').close();then()}
+    else{$('#lk-verify').value='';$('#lk-verify').classList.add('shake');setTimeout(()=>$('#lk-verify').classList.remove('shake'),450)}
+  };
+  $('#lk-verify-go').addEventListener('click',go);
+  $('#lk-verify').addEventListener('keydown',e=>{if(e.key==='Enter')go()});
+  $('#dlg-lock').showModal();
+  setTimeout(()=>$('#lk-verify').focus(),50);
+}
+function wireLockClose(){$('#lock-body').querySelectorAll('[data-close]').forEach(b=>b.addEventListener('click',()=>$('#dlg-lock').close()))}
+function openLockDialog(){
+  $('#lock-dlg-title').textContent='Barn lock 🔒';
+  if(!lockCfg){
+    $('#lock-body').innerHTML=`
+      <p class="sync-note">Set a passcode and the app asks for it every time it opens on this device. It also protects the ☁️ Sync settings. Each device sets its own lock.</p>
+      <div class="field"><label for="lk-new">New passcode</label><input type="password" id="lk-new" autocomplete="off"></div>
+      <div class="field"><label for="lk-new2">Type it again</label><input type="password" id="lk-new2" autocomplete="off"></div>
+      <div class="dlg-actions">
+        <button type="button" class="ghost-btn" data-close>Never mind</button>
+        <button type="button" class="cta" id="lk-set">Lock the barn 🔒</button>
+      </div>`;
+    wireLockClose();
+    $('#lk-set').addEventListener('click',async()=>{
+      const a=$('#lk-new').value,b=$('#lk-new2').value;
+      if(a.length<4){toast('Make the passcode at least 4 characters 🙏');return}
+      if(a!==b){toast('Those don’t match — try again 🤔');return}
+      const salt=Math.random().toString(36).slice(2,12);
+      lockCfg={salt,hash:await hashPass(a,salt)};saveLockCfg();
+      try{sessionStorage.setItem('hoofprints-unlocked','1')}catch(e){}
+      $('#dlg-lock').close();toast('Barn locked! 🔒 It’ll ask for the passcode next time it opens');
+    });
+  }else{
+    $('#lock-body').innerHTML=`
+      <p class="sync-note">The barn is locked on this device. 🔒<br>Forgot the passcode? Clearing this site's data in the browser removes the lock (and local data — cloud sync brings the barn back).</p>
+      <div class="field"><label for="lk-cur">Current passcode</label><input type="password" id="lk-cur" autocomplete="off"></div>
+      <div class="field"><label for="lk-chg">New passcode (leave empty to keep)</label><input type="password" id="lk-chg" autocomplete="off"></div>
+      <div class="dlg-actions">
+        <button type="button" class="ghost-btn" data-close>Never mind</button>
+        <button type="button" class="ghost-btn" id="lk-off">Remove lock</button>
+        <button type="button" class="cta" id="lk-save">Save 🔒</button>
+      </div>`;
+    wireLockClose();
+    const verify=async()=>{
+      if(await checkPass($('#lk-cur').value))return true;
+      toast('That’s not the current passcode 🤔');return false;
+    };
+    $('#lk-off').addEventListener('click',async()=>{
+      if(!(await verify()))return;
+      lockCfg=null;saveLockCfg();$('#dlg-lock').close();toast('Lock removed — the barn opens freely now 🚪');
+    });
+    $('#lk-save').addEventListener('click',async()=>{
+      if(!(await verify()))return;
+      const n=$('#lk-chg').value;
+      if(n){
+        if(n.length<4){toast('Make the passcode at least 4 characters 🙏');return}
+        const salt=Math.random().toString(36).slice(2,12);
+        lockCfg={salt,hash:await hashPass(n,salt)};saveLockCfg();
+        toast('Passcode changed! 🔒');
+      }
+      $('#dlg-lock').close();
+    });
+  }
+  $('#dlg-lock').showModal();
+}
+$('#btn-lock').addEventListener('click',()=>requirePass(openLockDialog));
+
 /* ================= cloud sync (Google Sheets) ================= */
 const SYNC_KEY='hoofprints-sync';
 let syncCfg=loadSyncCfg(),pushTimer=null;
@@ -2354,13 +2505,14 @@ async function pullCloud(manual){
     if(manual)toast('Cloud load didn’t work — check the URL and secret 🤔');
   }
 }
-$('#btn-sync').addEventListener('click',()=>{
+function openSyncDialog(){
   $('#sync-url').value=syncCfg.url;
   $('#sync-secret').value=syncCfg.secret;
   $('#sync-auto').checked=syncCfg.auto;
   syncStatus(syncCfg.url?'Ready ✅':'Not set up yet — paste the web app URL above.');
   $('#dlg-sync').showModal();
-});
+}
+$('#btn-sync').addEventListener('click',()=>requirePass(openSyncDialog));
 $('#sync-push').addEventListener('click',()=>{readSyncForm();pushCloud(true)});
 $('#sync-pull').addEventListener('click',()=>{readSyncForm();pullCloud(true)});
 $('#dlg-sync').addEventListener('close',readSyncForm);
