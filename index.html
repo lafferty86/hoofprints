@@ -1211,6 +1211,7 @@ function normalize(s){
   s.theme=THEMES.some(t=>t.id===s.theme)?s.theme:'party';
   s.games=Object.assign({quizBest:0,perfectQuiz:0,bestMemory:0,bestJump:0,mathBest:0,perfectMath:0},(s.games&&typeof s.games==='object')?s.games:{});
   s.updatedAt=typeof s.updatedAt==='number'?s.updatedAt:0;
+  s.mathLog=Array.isArray(s.mathLog)?s.mathLog.slice(-300):[];
   s.events=Array.isArray(s.events)?s.events:[];
   s.horses.forEach(h=>{h.care=Array.isArray(h.care)?h.care:[]});
   return s;
@@ -1848,18 +1849,12 @@ $('#mem-restart').addEventListener('click',startMem);
 /* ================= games: carrot count ================= */
 const MATH_LEVELS=[
   {id:'pony',   emoji:'🐴',name:'Pony',   desc:'Adding & taking away, small numbers'},
-  {id:'horse',  emoji:'🐎',name:'Horse',  desc:'Bigger numbers & times tables'},
-  {id:'unicorn',emoji:'🦄',name:'Unicorn',desc:'Big-kid math!'}
+  {id:'horse',  emoji:'🐎',name:'Horse',  desc:'Bigger numbers, times tables & sharing'},
+  {id:'unicorn',emoji:'🦄',name:'Unicorn',desc:'Big-kid math with all four signs!'}
 ];
 let mathRound=null;
-function mathQuestion(level){
+function makeOpts(ans){
   const ri=n=>1+Math.floor(Math.random()*n);
-  let a,b,op;
-  if(level==='pony'){op=Math.random()<.6?'+':'−';a=ri(10);b=ri(10)}
-  else if(level==='horse'){op=['+','−','×'][Math.floor(Math.random()*3)];if(op==='×'){a=1+ri(5);b=ri(9)}else{a=ri(30);b=ri(30)}}
-  else{op=['+','−','×'][Math.floor(Math.random()*3)];if(op==='×'){a=ri(12);b=ri(12)}else{a=ri(50);b=ri(50)}}
-  if(op==='−'&&b>a){const t=a;a=b;b=t}
-  const ans=op==='+'?a+b:op==='−'?a-b:a*b;
   const opts=new Set([ans]);
   let guard=0;
   while(opts.size<4&&guard++<80){
@@ -1867,32 +1862,71 @@ function mathQuestion(level){
     if(d>=0&&d!==ans)opts.add(d);
   }
   while(opts.size<4)opts.add(ans+opts.size);
-  return {text:`${a} ${op} ${b} = ?`,ans,opts:shuffle([...opts])};
+  return shuffle([...opts]);
+}
+function mathQuestion(level){
+  const ri=n=>1+Math.floor(Math.random()*n);
+  let a,b,op;
+  if(level==='pony'){op=Math.random()<.6?'+':'−';a=ri(10);b=ri(10)}
+  else if(level==='horse'){
+    op=['+','−','×','÷'][Math.floor(Math.random()*4)];
+    if(op==='×'){a=1+ri(5);b=ri(9)}
+    else if(op==='÷'){b=1+ri(4);const q=ri(9);a=b*q}
+    else{a=ri(30);b=ri(30)}
+  }else{
+    op=['+','−','×','÷'][Math.floor(Math.random()*4)];
+    if(op==='×'){a=ri(12);b=ri(12)}
+    else if(op==='÷'){b=1+ri(11);const q=ri(12);a=b*q}
+    else{a=ri(50);b=ri(50)}
+  }
+  if(op==='−'&&b>a){const t=a;a=b;b=t}
+  const ans=op==='+'?a+b:op==='−'?a-b:op==='×'?a*b:a/b;
+  return {text:`${a} ${op} ${b} = ?`,ans};
+}
+window._mathQ=mathQuestion;
+function modeLabel(mode){
+  if(mode==='retake')return 'Tricky ones 🔁';
+  if(mode.startsWith('facts-'))return '×'+mode.slice(6)+' facts';
+  const l=MATH_LEVELS.find(x=>x.id===mode);
+  return l?`Mixed · ${l.name} ${l.emoji}`:mode;
+}
+function startMathRound(mode,qlist){
+  mathRound={mode,qlist:qlist||null,idx:0,score:0,wrongs:[],total:qlist?qlist.length:10,start:Date.now()};
+  renderMathQ();
 }
 function startMath(){
   mathRound=null;
   $('#math-body').innerHTML=`
-    <p class="horse-meta" style="text-align:center">Every right answer is a carrot for the pony. Pick your level!</p>
-    <div class="quiz-opts" style="margin-top:12px">
+    <p class="horse-meta" style="text-align:center">Every right answer is a carrot for the pony!</p>
+    <p class="quiz-progress" style="margin-top:12px">Mixed round — pick a level</p>
+    <div class="quiz-opts">
       ${MATH_LEVELS.map(l=>`<button class="quiz-opt" data-mlevel="${l.id}"><b>${l.emoji} ${l.name}</b> — ${l.desc}</button>`).join('')}
+    </div>
+    <p class="quiz-progress" style="margin-top:16px">Times-table practice — pick your number</p>
+    <div class="pick-row">
+      ${[2,3,4,5,6,7,8,9,10,11,12].map(n=>`<button class="mini-btn" data-mfacts="${n}">×${n}</button>`).join('')}
     </div>`;
-  $('#math-body').querySelectorAll('[data-mlevel]').forEach(b=>b.addEventListener('click',()=>{
-    mathRound={level:b.dataset.mlevel,idx:0,score:0};
-    renderMathQ();
+  $('#math-body').querySelectorAll('[data-mlevel]').forEach(b=>b.addEventListener('click',()=>startMathRound(b.dataset.mlevel)));
+  $('#math-body').querySelectorAll('[data-mfacts]').forEach(b=>b.addEventListener('click',()=>{
+    const n=parseInt(b.dataset.mfacts,10);
+    const ks=shuffle([1,2,3,4,5,6,7,8,9,10,11,12]).slice(0,10);
+    startMathRound('facts-'+n,ks.map(k=>({text:`${n} × ${k} = ?`,ans:n*k})));
   }));
   $('#dlg-math').showModal();
 }
 function renderMathQ(){
   const r=mathRound;
-  const q=mathQuestion(r.level);
+  const q=r.qlist?r.qlist[r.idx]:mathQuestion(r.mode);
+  const opts=makeOpts(q.ans);
   $('#math-body').innerHTML=`
-    <p class="quiz-progress">Question ${r.idx+1} of 10 · Level: ${MATH_LEVELS.find(l=>l.id===r.level).emoji}</p>
+    <p class="quiz-progress">Question ${r.idx+1} of ${r.total} · ${modeLabel(r.mode)}</p>
     <p class="math-q">${q.text}</p>
-    <div class="math-opts">${q.opts.map(o=>`<button class="quiz-opt" data-val="${o}">${o}</button>`).join('')}</div>
+    <div class="math-opts">${opts.map(o=>`<button class="quiz-opt" data-val="${o}">${o}</button>`).join('')}</div>
     <p class="carrots">${'🥕'.repeat(r.score)}</p>`;
   $('#math-body').querySelectorAll('[data-val]').forEach(b=>b.addEventListener('click',()=>{
     const ok=parseInt(b.dataset.val,10)===q.ans;
     if(ok)r.score++;
+    else if(!r.wrongs.some(w=>w.text===q.text))r.wrongs.push({text:q.text,ans:q.ans});
     $('#math-body').querySelectorAll('[data-val]').forEach(x=>{
       x.disabled=true;
       if(parseInt(x.dataset.val,10)===q.ans)x.classList.add('right');
@@ -1902,27 +1936,39 @@ function renderMathQ(){
     if(ok)confetti(10);
     setTimeout(()=>{
       r.idx++;
-      if(r.idx<10)renderMathQ();else endMath();
-    },ok?650:1200);
+      if(r.idx<r.total)renderMathQ();else endMath();
+    },ok?650:1400);
   }));
 }
 function endMath(){
   const r=mathRound;
-  const msg=r.score===10?'PERFECT! The pony is stuffed with carrots! 🐴🥕':r.score>=7?'Great counting! The pony is very happy 😊':'Good try! The pony still got some snacks 💗';
+  const seconds=Math.max(1,Math.round((Date.now()-r.start)/1000));
+  const perfect=r.score===r.total;
+  const isRetake=r.mode==='retake';
+  let msg;
+  if(isRetake)msg=perfect?'You fixed them ALL! Nothing can stop you! 🌟':'Getting closer — the tricky ones are almost tamed!';
+  else msg=perfect?'PERFECT! The pony is stuffed with carrots! 🐴🥕':r.score>=r.total*.7?'Great counting! The pony is very happy 😊':'Good try! The pony still got some snacks 💗';
   $('#math-body').innerHTML=`<div class="quiz-end">
-    <div class="big">${r.score===10?'🏆':r.score>=7?'🥕':'🐴'}</div>
-    <h3>${r.score} out of 10!</h3>
-    <p class="horse-meta">${msg}</p>
+    <div class="big">${perfect?'🏆':r.score>=r.total*.7?'🥕':'🐴'}</div>
+    <h3>${r.score} out of ${r.total}!</h3>
+    <p class="horse-meta">${msg} · ⏱ ${Math.floor(seconds/60)?Math.floor(seconds/60)+'m ':''}${seconds%60}s</p>
     <p class="carrots">${'🥕'.repeat(r.score)}</p>
-    <div class="dlg-actions" style="justify-content:center">
+    <div class="dlg-actions" style="justify-content:center;flex-wrap:wrap">
       <button class="ghost-btn" data-close>Done</button>
-      <button class="cta" id="math-again">Play again! 🔄</button>
+      ${r.wrongs.length?`<button class="cta green" id="math-retake">🔁 Fix the tricky ones (${r.wrongs.length})</button>`:''}
+      <button class="cta" id="math-again">New round! 🔄</button>
     </div>
   </div>`;
   $('#math-body').querySelector('[data-close]').addEventListener('click',()=>$('#dlg-math').close());
   $('#math-again').addEventListener('click',startMath);
-  if(r.score>state.games.mathBest)state.games.mathBest=r.score;
-  if(r.score===10){state.games.perfectMath++;confetti(120)}
+  const rt=$('#math-retake');
+  if(rt)rt.addEventListener('click',()=>startMathRound('retake',shuffle(r.wrongs)));
+  if(!isRetake){
+    if(r.score>state.games.mathBest)state.games.mathBest=r.score;
+    if(perfect){state.games.perfectMath++;confetti(120)}
+  }else if(perfect)confetti(80);
+  state.mathLog.push({date:new Date().toISOString(),mode:r.mode,score:r.score,total:r.total,seconds});
+  if(state.mathLog.length>300)state.mathLog=state.mathLog.slice(-300);
   persist();render();checkNewBadges();
 }
 $('#btn-math').addEventListener('click',startMath);

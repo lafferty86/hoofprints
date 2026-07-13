@@ -118,6 +118,16 @@ function writeReadableTabs_(ss, d) {
     (d.events || []).slice().sort(function (a, b) { return String(a.date).localeCompare(String(b.date)); })
       .map(function (e) { return [e.date, e.title, EVENTS[e.type] || e.type]; }));
 
+  fill_(ss, 'Math 🥕',
+    ['Date', 'Mode', 'Score', 'Out of', 'Perfect', 'Time'],
+    (d.mathLog || []).slice().reverse().map(function (m) {
+      var mode = m.mode === 'retake' ? 'Tricky ones 🔁'
+        : (String(m.mode).indexOf('facts-') === 0 ? '×' + String(m.mode).slice(6) + ' facts'
+        : 'Mixed · ' + ({ pony: 'Pony 🐴', horse: 'Horse 🐎', unicorn: 'Unicorn 🦄' }[m.mode] || m.mode));
+      var t = Math.floor((m.seconds || 0) / 60) + 'm ' + ((m.seconds || 0) % 60) + 's';
+      return [String(m.date).slice(0, 10) + ' ' + String(m.date).slice(11, 16), mode, m.score, m.total, m.score === m.total ? '⭐' : '', t];
+    }));
+
   fill_(ss, 'Wishlist 🌠',
     ['Wish', 'Kind', 'Why', 'Came true', 'Date'],
     (d.wishes || []).map(function (w) {
