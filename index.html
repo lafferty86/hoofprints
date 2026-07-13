@@ -467,11 +467,19 @@ nav.tabs{display:flex;flex-direction:column;gap:7px;position:sticky;top:14px}
 .cal-head h3{font-size:1.25rem;font-weight:800}
 .cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
 .cal-dow{text-align:center;font-size:.68rem;font-weight:800;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.05em;padding:2px 0}
-.cal-day{aspect-ratio:1;border:2px solid var(--line);border-radius:10px;background:var(--card-2);font-size:.78rem;font-weight:800;padding:3px 0 0 5px;cursor:pointer;position:relative;overflow:hidden;text-align:left}
-.cal-day.blank{border-color:transparent;background:transparent;cursor:default}
+.cal-day{min-height:80px;border:2px solid var(--line);border-radius:10px;background:var(--card-2);font-size:.78rem;font-weight:800;padding:4px 4px 3px;cursor:pointer;overflow:hidden;text-align:left;display:flex;flex-direction:column;gap:2px;align-items:stretch}
+.cal-day.blank{border-color:transparent;background:transparent;cursor:default;min-height:0}
 .cal-day.today{border-color:var(--sky);box-shadow:0 0 0 2px var(--sky-soft)}
 .cal-day.selected{border-color:var(--rose);box-shadow:0 0 0 2px var(--rose-soft)}
-.cal-day .mini{position:absolute;bottom:1px;left:0;right:0;text-align:center;font-size:.72rem;white-space:nowrap;overflow:hidden}
+.cal-day .dnum{padding-left:2px}
+.cal-pill{display:block;background:var(--rose-soft);color:var(--rose-deep);border-radius:6px;padding:1px 4px;font-size:.62rem;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.5}
+.cal-rides{font-size:.72rem;line-height:1.2;padding-left:2px}
+.cal-more{font-size:.58rem;color:var(--ink-soft);font-weight:800;padding-left:2px}
+@media (max-width:760px){
+  .cal-day{min-height:62px;padding:3px 2px 2px}
+  .cal-pill{font-size:.5rem;padding:1px 3px}
+  .cal-rides{font-size:.62rem}
+}
 .cal-detail{margin-top:12px;display:flex;flex-direction:column;gap:8px}
 .event-row{display:flex;align-items:center;gap:10px}
 .event-row .when{font-size:.78rem;font-weight:800;color:var(--ink-soft);font-variant-numeric:tabular-nums;flex:0 0 auto}
@@ -1089,6 +1097,10 @@ footer .data-btns{display:flex;gap:10px;justify-content:center;margin-bottom:10p
     <div class="field">
       <label for="ev-date">When? (first time, if it repeats)</label>
       <input type="date" id="ev-date" required>
+    </div>
+    <div class="field">
+      <label for="ev-time">What time? (optional)</label>
+      <input type="time" id="ev-time">
     </div>
     <div class="field">
       <label>Does it repeat?</label>
@@ -2340,6 +2352,14 @@ function renderStats(){
 let calMonth=new Date();calMonth.setDate(1);
 let calSelected=null;
 function evType(id){return EVENT_TYPES.find(t=>t.id===id)||EVENT_TYPES[EVENT_TYPES.length-1]}
+function fmtTime(t){
+  if(!t)return '';
+  const[h,m]=t.split(':').map(Number);
+  const ap=h>=12?'pm':'am';
+  const h12=h%12||12;
+  return m?`${h12}:${String(m).padStart(2,'0')}${ap}`:`${h12}${ap}`;
+}
+function sortByTime(evs){return [...evs].sort((a,b)=>String(a.time||'99')<String(b.time||'99')?-1:1)}
 function renderCal(){
   const y=calMonth.getFullYear(),m=calMonth.getMonth();
   $('#cal-title').textContent=calMonth.toLocaleDateString(undefined,{month:'long',year:'numeric'});
@@ -2355,11 +2375,11 @@ function renderCal(){
   for(let i=0;i<firstDow;i++)html+='<div class="cal-day blank"></div>';
   for(let d=1;d<=daysIn;d++){
     const ds=`${y}-${pad(m+1)}-${pad(d)}`;
-    const marks=[
-      ...(ridesBy[ds]||[]).map(r=>(ACTIVITIES.find(a=>a.id===r.activity)||{}).emoji||'🐎'),
-      ...evtsOn(ds).map(e=>evType(e.type).emoji)
-    ].slice(0,3).join('');
-    html+=`<button class="cal-day${ds===today?' today':''}${ds===calSelected?' selected':''}" data-day="${ds}">${d}<span class="mini">${marks}</span></button>`;
+    const dayEvs=sortByTime(evtsOn(ds));
+    const rideMarks=(ridesBy[ds]||[]).map(r=>(ACTIVITIES.find(a=>a.id===r.activity)||{}).emoji||'🐎').slice(0,4).join('');
+    const pills=dayEvs.slice(0,2).map(e=>`<span class="cal-pill">${evType(e.type).emoji} ${e.time?fmtTime(e.time)+' ':''}${esc(e.title)}</span>`).join('');
+    const more=dayEvs.length>2?`<span class="cal-more">+${dayEvs.length-2} more</span>`:'';
+    html+=`<button class="cal-day${ds===today?' today':''}${ds===calSelected?' selected':''}" data-day="${ds}"><span class="dnum">${d}</span>${pills}${more}${rideMarks?`<span class="cal-rides">${rideMarks}</span>`:''}</button>`;
   }
   $('#cal-grid').innerHTML=html;
   $('#cal-grid').querySelectorAll('[data-day]').forEach(b=>b.addEventListener('click',()=>{
@@ -2373,7 +2393,7 @@ function renderCal(){
     const rides=ridesBy[calSelected]||[],evs=evtsOn(calSelected);
     let inner=`<div class="month-label">${d.toLocaleDateString(undefined,{weekday:'long',day:'numeric',month:'long'})}</div>`;
     if(!rides.length&&!evs.length)inner+='<p class="horse-meta">Nothing here yet — a perfect day for a ride? 🐴</p>';
-    inner+=evs.map(e=>`<div class="event-row"><span>${evType(e.type).emoji}</span><h3>${esc(e.title)}${e.repeat&&e.repeat!=='none'?` <span class="chip gold">🔁 ${REPEAT_LABEL[e.repeat]}</span>`:''}</h3><button class="del" data-delev="${e.id}" title="Remove">✖</button></div>`).join('');
+    inner+=sortByTime(evs).map(e=>`<div class="event-row"><span>${evType(e.type).emoji}</span><h3>${e.time?`<span class="chip sky">⏰ ${fmtTime(e.time)}</span> `:''}${esc(e.title)}${e.repeat&&e.repeat!=='none'?` <span class="chip gold">🔁 ${REPEAT_LABEL[e.repeat]}</span>`:''}</h3><button class="del" data-delev="${e.id}" title="Remove">✖</button></div>`).join('');
     inner+=rides.map(r=>{
       const h=horseById(r.horseId),a=ACTIVITIES.find(x=>x.id===r.activity)||ACTIVITIES[0];
       return `<div class="event-row"><span>${a.emoji}</span><h3>${a.name} with ${esc(h?h.name:'?')}</h3><span class="when">${r.minutes} min ${MOODS[r.mood]||''}</span></div>`;
@@ -2395,7 +2415,7 @@ function renderCal(){
     return `<div class="event-row">
       <span>${evType(e.type).emoji}</span>
       <h3>${esc(e.title)}</h3>
-      <span class="when">${new Date(next+'T12:00:00').toLocaleDateString(undefined,{day:'numeric',month:'short'})}${rep}</span>
+      <span class="when">${new Date(next+'T12:00:00').toLocaleDateString(undefined,{day:'numeric',month:'short'})}${e.time?' · ⏰ '+fmtTime(e.time):''}${rep}</span>
       <span class="countdown${days===0?' today':''}">${cd}</span>
       <button class="del" data-delev="${e.id}" title="Remove">✖</button>
     </div>`;
@@ -2415,6 +2435,7 @@ $('#btn-add-event').addEventListener('click',()=>{
   $('#ev-title').value='';
   $('#ev-date').value=calSelected||todayStr();
   document.querySelector('#ev-repeat input[value="none"]').checked=true;
+  $('#ev-time').value='';
   $('#ev-until').value='';
   $('#ev-until-wrap').hidden=true;
   $('#dlg-event').showModal();
@@ -2431,6 +2452,7 @@ $('#form-event').addEventListener('submit',()=>{
     date:$('#ev-date').value,
     repeat
   };
+  if($('#ev-time').value)ev.time=$('#ev-time').value;
   const until=$('#ev-until').value;
   if(repeat!=='none'&&until)ev.until=until;
   state.events.push(ev);

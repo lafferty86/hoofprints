@@ -115,9 +115,9 @@ function writeReadableTabs_(ss, d) {
 
   var REPEATS = { weekly: 'Every week 🔁', biweekly: 'Every 2 weeks 🔁', monthly: 'Every month 🔁' };
   fill_(ss, 'Calendar 🗓️',
-    ['Starts', 'What', 'Kind', 'Repeats', 'Until'],
+    ['Starts', 'Time', 'What', 'Kind', 'Repeats', 'Until'],
     (d.events || []).slice().sort(function (a, b) { return String(a.date).localeCompare(String(b.date)); })
-      .map(function (e) { return [e.date, e.title, EVENTS[e.type] || e.type, REPEATS[e.repeat] || '', e.until || '']; }));
+      .map(function (e) { return [e.date, e.time || '', e.title, EVENTS[e.type] || e.type, REPEATS[e.repeat] || '', e.until || '']; }));
 
   fill_(ss, 'Math 🥕',
     ['Date', 'Mode', 'Score', 'Out of', 'Perfect', 'Time'],
