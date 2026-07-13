@@ -14,8 +14,8 @@ Hoofprints is a single-file web app: everything lives in `index.html`. It works 
 - **Care log** — per-horse records of farrier, vet, dentist, vaccine, worming, and spa days
 - **My Goals** — riding goals with a practice progress bar, a big "I practiced! +1" button, and a confetti party when a goal is crushed
 - **Wishlist** — dream horses, gear, and adventures, with an "It came true!" button
-- **Badge Wall** — 25 prize rosettes earned automatically (First Hoofprint, Trail Blazer, Goal Getter, Wish Come True…)
-- **Fun Stuff** — daily horse fact, dream-horse name generator, a galloping-pony button, and **3 mini-games**: Pony Quiz Show (horse trivia), Stable Pairs (memory match), and Gallop! (jump-the-fences arcade runner) — all with saved best scores
+- **Badge Wall** — 26 prize rosettes earned automatically (First Hoofprint, Trail Blazer, Goal Getter, Wish Come True…)
+- **Fun Stuff** — daily horse fact, dream-horse name generator, a galloping-pony button, and **4 mini-games**: Pony Quiz Show (horse trivia), Stable Pairs (memory match), Gallop! (jump-the-fences arcade runner), and Carrot Count (feed-the-pony math with 3 levels) — all with saved best scores
 - **5 themes** via the 🎨 Theme button — Pony Party (playful classic), Unicorn Dream (pastel), Show Ring (classic hunter green & serif for older kids), Western Trail (desert & turquoise), and Midnight Canter (moody indigo for teens); each with light and dark variants
 - Confetti when good things happen 🎉
 
