@@ -45,8 +45,10 @@ if('serviceWorker' in navigator && (location.protocol==='https:'||location.hostn
   --green:#3F8F5D;          /* paddock green */
   --green-soft:#DEF0E2;
   --gold:#EFA733;           /* rosette gold */
+  --gold-deep:#8B611E;      /* readable gold text on soft bgs */
   --gold-soft:#FCEBC9;
   --sky:#5E9FCB;
+  --sky-deep:#406C8A;       /* readable sky text on soft bgs */
   --sky-soft:#DDEDF8;
   --line:#EBD9BC;
   --shadow:0 4px 0 rgba(74,50,38,.10);
@@ -67,9 +69,9 @@ if('serviceWorker' in navigator && (location.protocol==='https:'||location.hostn
     --green:#6FBE8A;
     --green-deep:#377A52;
     --green-soft:#28392C;
-    --gold:#F3B857;
+    --gold:#F3B857;--gold-deep:#F3B857;
     --gold-soft:#463317;
-    --sky:#7FB9DF;
+    --sky:#7FB9DF;--sky-deep:#7FB9DF;
     --sky-soft:#22333F;
     --line:#4C382A;
     --shadow:0 4px 0 rgba(0,0,0,.30);
@@ -79,13 +81,13 @@ if('serviceWorker' in navigator && (location.protocol==='https:'||location.hostn
 :root[data-theme="light"]{
   --paper:#FFF7E8;--spot:#F3E4C8;--card:#FFFFFF;--card-2:#FFF1DC;--ink:#4A3226;--ink-soft:#8A6F5E;
   --rose:#E0567F;--rose-deep:#C13D66;--rose-soft:#FBE3EC;--green:#3F8F5D;--green-deep:#2E6B45;--green-soft:#DEF0E2;
-  --gold:#EFA733;--gold-soft:#FCEBC9;--sky:#5E9FCB;--sky-soft:#DDEDF8;--line:#EBD9BC;
+  --gold:#EFA733;--gold-deep:#8B611E;--gold-soft:#FCEBC9;--sky:#5E9FCB;--sky-deep:#406C8A;--sky-soft:#DDEDF8;--line:#EBD9BC;
   --shadow:0 4px 0 rgba(74,50,38,.10);--shadow-lift:0 10px 24px rgba(74,50,38,.16);
 }
 :root[data-theme="dark"]{
   --paper:#241813;--spot:#2E2018;--card:#33241B;--card-2:#3C2B20;--ink:#F6E9D8;--ink-soft:#C4A992;
   --rose:#F0729A;--rose-deep:#F79BB7;--rose-soft:#4A2733;--green:#6FBE8A;--green-deep:#377A52;--green-soft:#28392C;
-  --gold:#F3B857;--gold-soft:#463317;--sky:#7FB9DF;--sky-soft:#22333F;--line:#4C382A;
+  --gold:#F3B857;--gold-deep:#F3B857;--gold-soft:#463317;--sky:#7FB9DF;--sky-deep:#7FB9DF;--sky-soft:#22333F;--line:#4C382A;
   --shadow:0 4px 0 rgba(0,0,0,.30);--shadow-lift:0 10px 24px rgba(0,0,0,.45);
 }
 
@@ -94,27 +96,27 @@ if('serviceWorker' in navigator && (location.protocol==='https:'||location.hostn
 :root[data-app-theme="unicorn"]{
   --paper:#F7F2FF;--spot:#EADFF7;--card:#FFFFFF;--card-2:#F3ECFC;--ink:#4B3A66;--ink-soft:#8C7BAA;
   --rose:#B45FD6;--rose-deep:#9440BC;--rose-soft:#F3E2FA;--green:#4FAE94;--green-deep:#37806C;--green-soft:#DFF3ED;
-  --gold:#EFB35C;--gold-soft:#FBEDD3;--sky:#7D8FE8;--sky-soft:#E4E8FB;--line:#E3D8F1;
+  --gold:#EFB35C;--gold-deep:#866434;--gold-soft:#FBEDD3;--sky:#7D8FE8;--sky-deep:#5663A0;--sky-soft:#E4E8FB;--line:#E3D8F1;
   --shadow:0 4px 0 rgba(75,58,102,.10);--shadow-lift:0 10px 24px rgba(75,58,102,.16);
 }
 @media (prefers-color-scheme: dark){
   :root[data-app-theme="unicorn"]{
     --paper:#221A33;--spot:#2B2142;--card:#2F2647;--card-2:#3A2F55;--ink:#EFE8FA;--ink-soft:#B4A6D1;
     --rose:#D68FEB;--rose-deep:#E4AFF2;--rose-soft:#45305A;--green:#7CCBB4;--green-deep:#2F5E4F;--green-soft:#263D36;
-    --gold:#F0C877;--gold-soft:#443823;--sky:#98A8F0;--sky-soft:#262E4D;--line:#473A63;
+    --gold:#F0C877;--gold-deep:#F0C877;--gold-soft:#443823;--sky:#98A8F0;--sky-deep:#98A8F0;--sky-soft:#262E4D;--line:#473A63;
     --shadow:0 4px 0 rgba(0,0,0,.30);--shadow-lift:0 10px 24px rgba(0,0,0,.45);
   }
 }
 :root[data-app-theme="unicorn"][data-theme="dark"]{
   --paper:#221A33;--spot:#2B2142;--card:#2F2647;--card-2:#3A2F55;--ink:#EFE8FA;--ink-soft:#B4A6D1;
   --rose:#D68FEB;--rose-deep:#E4AFF2;--rose-soft:#45305A;--green:#7CCBB4;--green-deep:#2F5E4F;--green-soft:#263D36;
-  --gold:#F0C877;--gold-soft:#443823;--sky:#98A8F0;--sky-soft:#262E4D;--line:#473A63;
+  --gold:#F0C877;--gold-deep:#F0C877;--gold-soft:#443823;--sky:#98A8F0;--sky-deep:#98A8F0;--sky-soft:#262E4D;--line:#473A63;
   --shadow:0 4px 0 rgba(0,0,0,.30);--shadow-lift:0 10px 24px rgba(0,0,0,.45);
 }
 :root[data-app-theme="unicorn"][data-theme="light"]{
   --paper:#F7F2FF;--spot:#EADFF7;--card:#FFFFFF;--card-2:#F3ECFC;--ink:#4B3A66;--ink-soft:#8C7BAA;
   --rose:#B45FD6;--rose-deep:#9440BC;--rose-soft:#F3E2FA;--green:#4FAE94;--green-deep:#37806C;--green-soft:#DFF3ED;
-  --gold:#EFB35C;--gold-soft:#FBEDD3;--sky:#7D8FE8;--sky-soft:#E4E8FB;--line:#E3D8F1;
+  --gold:#EFB35C;--gold-deep:#866434;--gold-soft:#FBEDD3;--sky:#7D8FE8;--sky-deep:#5663A0;--sky-soft:#E4E8FB;--line:#E3D8F1;
   --shadow:0 4px 0 rgba(75,58,102,.10);--shadow-lift:0 10px 24px rgba(75,58,102,.16);
 }
 
@@ -125,27 +127,27 @@ if('serviceWorker' in navigator && (location.protocol==='https:'||location.hostn
   --bg-size:auto;--bg-pos:0 0;
   --paper:#F7F4EC;--spot:#EAE4D2;--card:#FFFFFF;--card-2:#F0EBDD;--ink:#2A3A2E;--ink-soft:#6E7D70;
   --rose:#2E6B47;--rose-deep:#1F4E33;--rose-soft:#DFEAE0;--green:#8E3B3B;--green-deep:#5E2626;--green-soft:#F2DFDF;
-  --gold:#B9892F;--gold-soft:#F0E6CB;--sky:#33547D;--sky-soft:#DFE7F1;--line:#DFD8C2;
+  --gold:#B9892F;--gold-deep:#826021;--gold-soft:#F0E6CB;--sky:#33547D;--sky-deep:#33547D;--sky-soft:#DFE7F1;--line:#DFD8C2;
   --shadow:0 4px 0 rgba(42,58,46,.10);--shadow-lift:0 10px 24px rgba(42,58,46,.16);
 }
 @media (prefers-color-scheme: dark){
   :root[data-app-theme="show"]{
     --paper:#1C2620;--spot:#25322A;--card:#253029;--card-2:#2C3A31;--ink:#ECEADF;--ink-soft:#A6B3A7;
     --rose:#6FAF88;--rose-deep:#92C7A8;--rose-soft:#294233;--green:#C97C7C;--green-deep:#5E3535;--green-soft:#442B2B;
-    --gold:#D4AF5E;--gold-soft:#3E3520;--sky:#8FB0D8;--sky-soft:#263444;--line:#3A4A3F;
+    --gold:#D4AF5E;--gold-deep:#D4AF5E;--gold-soft:#3E3520;--sky:#8FB0D8;--sky-deep:#8FB0D8;--sky-soft:#263444;--line:#3A4A3F;
     --shadow:0 4px 0 rgba(0,0,0,.30);--shadow-lift:0 10px 24px rgba(0,0,0,.45);
   }
 }
 :root[data-app-theme="show"][data-theme="dark"]{
   --paper:#1C2620;--spot:#25322A;--card:#253029;--card-2:#2C3A31;--ink:#ECEADF;--ink-soft:#A6B3A7;
   --rose:#6FAF88;--rose-deep:#92C7A8;--rose-soft:#294233;--green:#C97C7C;--green-deep:#5E3535;--green-soft:#442B2B;
-  --gold:#D4AF5E;--gold-soft:#3E3520;--sky:#8FB0D8;--sky-soft:#263444;--line:#3A4A3F;
+  --gold:#D4AF5E;--gold-deep:#D4AF5E;--gold-soft:#3E3520;--sky:#8FB0D8;--sky-deep:#8FB0D8;--sky-soft:#263444;--line:#3A4A3F;
   --shadow:0 4px 0 rgba(0,0,0,.30);--shadow-lift:0 10px 24px rgba(0,0,0,.45);
 }
 :root[data-app-theme="show"][data-theme="light"]{
   --paper:#F7F4EC;--spot:#EAE4D2;--card:#FFFFFF;--card-2:#F0EBDD;--ink:#2A3A2E;--ink-soft:#6E7D70;
   --rose:#2E6B47;--rose-deep:#1F4E33;--rose-soft:#DFEAE0;--green:#8E3B3B;--green-deep:#5E2626;--green-soft:#F2DFDF;
-  --gold:#B9892F;--gold-soft:#F0E6CB;--sky:#33547D;--sky-soft:#DFE7F1;--line:#DFD8C2;
+  --gold:#B9892F;--gold-deep:#826021;--gold-soft:#F0E6CB;--sky:#33547D;--sky-deep:#33547D;--sky-soft:#DFE7F1;--line:#DFD8C2;
   --shadow:0 4px 0 rgba(42,58,46,.10);--shadow-lift:0 10px 24px rgba(42,58,46,.16);
 }
 
@@ -156,27 +158,27 @@ if('serviceWorker' in navigator && (location.protocol==='https:'||location.hostn
   --bg-size:auto;--bg-pos:0 0;
   --paper:#FBF0DF;--spot:#F0DFC0;--card:#FFFFFF;--card-2:#F6E8D2;--ink:#4F3421;--ink-soft:#93705A;
   --rose:#C75B39;--rose-deep:#A4432A;--rose-soft:#F7E0D7;--green:#2E8C87;--green-deep:#1F6560;--green-soft:#DBEFEA;
-  --gold:#D99A2B;--gold-soft:#F6E9C8;--sky:#4E7CA8;--sky-soft:#DFE9F2;--line:#EBD8B8;
+  --gold:#D99A2B;--gold-deep:#875F1B;--gold-soft:#F6E9C8;--sky:#4E7CA8;--sky-deep:#42698F;--sky-soft:#DFE9F2;--line:#EBD8B8;
   --shadow:0 4px 0 rgba(79,52,33,.10);--shadow-lift:0 10px 24px rgba(79,52,33,.16);
 }
 @media (prefers-color-scheme: dark){
   :root[data-app-theme="western"]{
     --paper:#271A0F;--spot:#322214;--card:#362718;--card-2:#402E1D;--ink:#F4E8D8;--ink-soft:#C7A88E;
     --rose:#E07B57;--rose-deep:#EB9C7E;--rose-soft:#4A2C21;--green:#5BBFB8;--green-deep:#2A6963;--green-soft:#1F3A38;
-    --gold:#E8B458;--gold-soft:#453317;--sky:#82AACE;--sky-soft:#24384A;--line:#4D3823;
+    --gold:#E8B458;--gold-deep:#E8B458;--gold-soft:#453317;--sky:#82AACE;--sky-deep:#82AACE;--sky-soft:#24384A;--line:#4D3823;
     --shadow:0 4px 0 rgba(0,0,0,.30);--shadow-lift:0 10px 24px rgba(0,0,0,.45);
   }
 }
 :root[data-app-theme="western"][data-theme="dark"]{
   --paper:#271A0F;--spot:#322214;--card:#362718;--card-2:#402E1D;--ink:#F4E8D8;--ink-soft:#C7A88E;
   --rose:#E07B57;--rose-deep:#EB9C7E;--rose-soft:#4A2C21;--green:#5BBFB8;--green-deep:#2A6963;--green-soft:#1F3A38;
-  --gold:#E8B458;--gold-soft:#453317;--sky:#82AACE;--sky-soft:#24384A;--line:#4D3823;
+  --gold:#E8B458;--gold-deep:#E8B458;--gold-soft:#453317;--sky:#82AACE;--sky-deep:#82AACE;--sky-soft:#24384A;--line:#4D3823;
   --shadow:0 4px 0 rgba(0,0,0,.30);--shadow-lift:0 10px 24px rgba(0,0,0,.45);
 }
 :root[data-app-theme="western"][data-theme="light"]{
   --paper:#FBF0DF;--spot:#F0DFC0;--card:#FFFFFF;--card-2:#F6E8D2;--ink:#4F3421;--ink-soft:#93705A;
   --rose:#C75B39;--rose-deep:#A4432A;--rose-soft:#F7E0D7;--green:#2E8C87;--green-deep:#1F6560;--green-soft:#DBEFEA;
-  --gold:#D99A2B;--gold-soft:#F6E9C8;--sky:#4E7CA8;--sky-soft:#DFE9F2;--line:#EBD8B8;
+  --gold:#D99A2B;--gold-deep:#875F1B;--gold-soft:#F6E9C8;--sky:#4E7CA8;--sky-deep:#42698F;--sky-soft:#DFE9F2;--line:#EBD8B8;
   --shadow:0 4px 0 rgba(79,52,33,.10);--shadow-lift:0 10px 24px rgba(79,52,33,.16);
 }
 
@@ -187,27 +189,27 @@ if('serviceWorker' in navigator && (location.protocol==='https:'||location.hostn
   --bg-size:64px 64px;--bg-pos:0 0,32px 32px;
   --paper:#EEEFF7;--spot:#DCDEED;--card:#FFFFFF;--card-2:#F1F2FA;--ink:#2B2F4A;--ink-soft:#71769A;
   --rose:#6D5FD0;--rose-deep:#5445B8;--rose-soft:#E7E3F9;--green:#43A18B;--green-deep:#2F7767;--green-soft:#DEF0EA;
-  --gold:#D9A430;--gold-soft:#F3E7C6;--sky:#5B8DD6;--sky-soft:#DFE9F8;--line:#D9DBEA;
+  --gold:#D9A430;--gold-deep:#80611C;--gold-soft:#F3E7C6;--sky:#5B8DD6;--sky-deep:#43689E;--sky-soft:#DFE9F8;--line:#D9DBEA;
   --shadow:0 4px 0 rgba(43,47,74,.10);--shadow-lift:0 10px 24px rgba(43,47,74,.16);
 }
 @media (prefers-color-scheme: dark){
   :root[data-app-theme="midnight"]{
     --paper:#14162B;--spot:#20233F;--card:#1F2340;--card-2:#282C4E;--ink:#E9EAF6;--ink-soft:#A2A6C8;
     --rose:#9A8CF0;--rose-deep:#B4A9F5;--rose-soft:#322D5C;--green:#5FC4AD;--green-deep:#2C6B5C;--green-soft:#1E3A34;
-    --gold:#E8C766;--gold-soft:#3B331C;--sky:#8CB2E8;--sky-soft:#223050;--line:#363B63;
+    --gold:#E8C766;--gold-deep:#E8C766;--gold-soft:#3B331C;--sky:#8CB2E8;--sky-deep:#8CB2E8;--sky-soft:#223050;--line:#363B63;
     --shadow:0 4px 0 rgba(0,0,0,.35);--shadow-lift:0 10px 24px rgba(0,0,0,.5);
   }
 }
 :root[data-app-theme="midnight"][data-theme="dark"]{
   --paper:#14162B;--spot:#20233F;--card:#1F2340;--card-2:#282C4E;--ink:#E9EAF6;--ink-soft:#A2A6C8;
   --rose:#9A8CF0;--rose-deep:#B4A9F5;--rose-soft:#322D5C;--green:#5FC4AD;--green-deep:#2C6B5C;--green-soft:#1E3A34;
-  --gold:#E8C766;--gold-soft:#3B331C;--sky:#8CB2E8;--sky-soft:#223050;--line:#363B63;
+  --gold:#E8C766;--gold-deep:#E8C766;--gold-soft:#3B331C;--sky:#8CB2E8;--sky-deep:#8CB2E8;--sky-soft:#223050;--line:#363B63;
   --shadow:0 4px 0 rgba(0,0,0,.35);--shadow-lift:0 10px 24px rgba(0,0,0,.5);
 }
 :root[data-app-theme="midnight"][data-theme="light"]{
   --paper:#EEEFF7;--spot:#DCDEED;--card:#FFFFFF;--card-2:#F1F2FA;--ink:#2B2F4A;--ink-soft:#71769A;
   --rose:#6D5FD0;--rose-deep:#5445B8;--rose-soft:#E7E3F9;--green:#43A18B;--green-deep:#2F7767;--green-soft:#DEF0EA;
-  --gold:#D9A430;--gold-soft:#F3E7C6;--sky:#5B8DD6;--sky-soft:#DFE9F8;--line:#D9DBEA;
+  --gold:#D9A430;--gold-deep:#80611C;--gold-soft:#F3E7C6;--sky:#5B8DD6;--sky-deep:#43689E;--sky-soft:#DFE9F8;--line:#D9DBEA;
   --shadow:0 4px 0 rgba(43,47,74,.10);--shadow-lift:0 10px 24px rgba(43,47,74,.16);
 }
 
@@ -272,8 +274,8 @@ header{display:flex;flex-wrap:wrap;align-items:center;gap:14px;margin:8px 0 18px
 .stat b{display:block;font-family:var(--font-display);font-size:1.7rem;font-weight:800;font-variant-numeric:tabular-nums;color:var(--rose)}
 .stat span{font-size:.8rem;font-weight:700;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.08em}
 .stat:nth-child(2) b{color:var(--green)}
-.stat:nth-child(3) b{color:var(--sky)}
-.stat:nth-child(4) b{color:var(--gold)}
+.stat:nth-child(3) b{color:var(--sky-deep)}
+.stat:nth-child(4) b{color:var(--gold-deep)}
 
 /* ============ horse profile page ============ */
 .stat{cursor:pointer;transition:transform .12s ease}
@@ -345,8 +347,8 @@ nav.tabs{display:flex;flex-direction:column;gap:7px;position:sticky;top:14px}
 .chips{display:flex;flex-wrap:wrap;gap:6px}
 .chip{background:var(--rose-soft);color:var(--rose-deep);border-radius:999px;padding:2px 10px;font-size:.78rem;font-weight:800}
 .chip.green{background:var(--green-soft);color:var(--green)}
-.chip.gold{background:var(--gold-soft);color:var(--gold)}
-.chip.sky{background:var(--sky-soft);color:var(--sky)}
+.chip.gold{background:var(--gold-soft);color:var(--gold-deep)}
+.chip.sky{background:var(--sky-soft);color:var(--sky-deep)}
 .horse-meta{font-size:.9rem;color:var(--ink-soft);margin:0}
 .horse-meta b{color:var(--ink)}
 .card-actions{display:flex;gap:6px;margin-top:auto;padding-top:6px}
@@ -388,8 +390,11 @@ nav.tabs{display:flex;flex-direction:column;gap:7px;position:sticky;top:14px}
 .ride-note{margin:4px 0 0;font-size:.95rem}
 .ride-note::before{content:"“";color:var(--rose)}
 .ride-note::after{content:"”";color:var(--rose)}
-.ride .del{position:absolute;top:10px;right:10px;border:none;background:none;color:var(--ink-soft);font-size:.9rem;padding:4px}
-.ride .del:hover{color:var(--rose)}
+.ride .del,.ride .edit{position:absolute;top:2px;border:none;background:none;color:var(--ink-soft);font-size:1rem;line-height:1;padding:12px;min-width:40px;min-height:40px;border-radius:12px}
+.ride .del{right:2px}
+.ride .edit{right:44px}
+.ride .del:hover,.ride .edit:hover{color:var(--rose)}
+.ride .ride-top{padding-right:80px}
 .journal-list{display:flex;flex-direction:column;gap:10px}
 .month-label{font-family:var(--font-display);font-weight:600;color:var(--ink-soft);margin:10px 0 2px;font-size:.95rem;text-transform:uppercase;letter-spacing:.08em}
 
@@ -477,17 +482,28 @@ nav.tabs{display:flex;flex-direction:column;gap:7px;position:sticky;top:14px}
 .cal-more{font-size:.58rem;color:var(--ink-soft);font-weight:800;padding-left:2px}
 @media (max-width:760px){
   .cal-day{min-height:62px;padding:3px 2px 2px}
-  .cal-pill{font-size:.5rem;padding:1px 3px}
+  /* title-first pills on phones: drop emoji + time, wrap to 2 lines — tap the day for details */
+  .cal-pill{font-size:.62rem;padding:1px 3px;white-space:normal;overflow-wrap:break-word;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;line-height:1.3}
+  .cal-pill .pill-emoji{display:none}
   .cal-rides{font-size:.62rem}
 }
 .cal-detail{margin-top:12px;display:flex;flex-direction:column;gap:8px}
 .event-row{display:flex;align-items:center;gap:10px}
 .event-row .when{font-size:.78rem;font-weight:800;color:var(--ink-soft);font-variant-numeric:tabular-nums;flex:0 0 auto}
 .event-row h3{font-size:1rem;font-weight:800;flex:1;min-width:0}
-.countdown{background:var(--gold-soft);color:var(--gold);border-radius:999px;padding:2px 10px;font-size:.75rem;font-weight:800;white-space:nowrap}
+.countdown{background:var(--gold-soft);color:var(--gold-deep);border-radius:999px;padding:2px 10px;font-size:.75rem;font-weight:800;white-space:nowrap}
 .countdown.today{background:var(--rose-soft);color:var(--rose-deep)}
-.event-row .del{border:none;background:none;color:var(--ink-soft);font-size:.85rem;padding:4px;cursor:pointer}
+.event-row .del{border:none;background:none;color:var(--ink-soft);font-size:1rem;line-height:1;padding:12px;min-width:40px;min-height:40px;border-radius:12px;cursor:pointer;flex:0 0 auto}
 .event-row .del:hover{color:var(--rose)}
+@media (max-width:760px){
+  /* "Coming up" rows: title on line 1 (delete top-right), date + countdown on line 2 */
+  .event-row{display:grid;grid-template-columns:auto minmax(0,1fr) auto;column-gap:8px;align-items:center}
+  .event-row>span:first-child{grid-column:1;grid-row:1}
+  .event-row h3{grid-column:2;grid-row:1}
+  .event-row .del{grid-column:3;grid-row:1;justify-self:end}
+  .event-row .when{grid-column:2;grid-row:2}
+  .event-row .countdown{grid-column:3;grid-row:2;justify-self:end}
+}
 
 /* ============ care log ============ */
 .care-row{display:flex;align-items:center;gap:10px;padding:8px 10px;border:2px solid var(--line);border-radius:12px;background:var(--card-2);margin-bottom:8px}
@@ -510,18 +526,21 @@ dialog::backdrop{background:rgba(60,35,20,.45);backdrop-filter:blur(3px)}
 .dlg-inner h2{font-size:1.5rem;font-weight:800;margin-bottom:14px}
 .field{margin-bottom:14px}
 .field>label{display:block;font-weight:800;font-size:.85rem;text-transform:uppercase;letter-spacing:.07em;color:var(--ink-soft);margin-bottom:5px}
-.field input[type=text],.field input[type=date],.field input[type=number],.field select,.field textarea{
+.field input[type=text],.field input[type=date],.field input[type=number],.field input[type=password],.field input[type=time],.field select,.field textarea{
   width:100%;border:2px solid var(--line);border-radius:12px;padding:9px 12px;background:var(--card-2);
 }
 .field textarea{resize:vertical;min-height:60px}
 .swatches,.pick-row{display:flex;flex-wrap:wrap;gap:8px}
 .swatches label,.pick-row label{cursor:pointer}
 .swatches input,.pick-row input{position:absolute;opacity:0;pointer-events:none}
+.swatches label{display:flex;flex-direction:column;align-items:center;gap:4px;width:56px;text-align:center}
 .swatch{
-  width:40px;height:40px;border-radius:50%;display:grid;place-items:center;font-size:.62rem;font-weight:800;color:#fff;
-  border:3px solid transparent;text-shadow:0 1px 2px rgba(0,0,0,.4);
+  width:34px;height:34px;border-radius:50%;
+  border:3px solid transparent;box-shadow:inset 0 0 0 1px rgba(0,0,0,.12);
 }
+.swatch-name{font-size:.66rem;font-weight:800;color:var(--ink-soft);line-height:1.15}
 .swatches input:checked+.swatch{border-color:var(--rose);transform:scale(1.12)}
+.swatches input:checked~.swatch-name{color:var(--rose-deep)}
 .pick{
   display:inline-block;border:2px solid var(--line);background:var(--card-2);border-radius:999px;
   padding:5px 13px;font-weight:800;font-size:.88rem;transition:all .1s ease;
@@ -801,7 +820,7 @@ footer .data-btns{display:flex;gap:10px;justify-content:center;margin-bottom:10p
         <h3>👀 Stable Pairs</h3>
         <p class="horse-meta">Find all 8 matching pairs in as few flips as you can.</p>
         <p class="chips"><span class="chip sky" id="mem-best-chip">Best: —</span></p>
-        <button class="cta" id="btn-mem">Play! 🂠</button>
+        <button class="cta" id="btn-mem">Play! 🎴</button>
       </div>
       <div class="card fun-card">
         <h3>🏇 Gallop!</h3>
@@ -833,7 +852,7 @@ footer .data-btns{display:flex;gap:10px;justify-content:center;margin-bottom:10p
       <button class="mini-btn" id="btn-import">📂 Load barn from a file</button>
       <input type="file" id="file-import" accept=".json,application/json" hidden>
     </div>
-    Made with 💗 and hay. Everything is saved right here on this device.
+    Made with 💗 and hay. <span id="save-note">Everything is saved right here on this device.</span>
   </footer>
 </div>
 
@@ -874,13 +893,13 @@ footer .data-btns{display:flex;gap:10px;justify-content:center;margin-bottom:10p
       <div class="pick-row" id="h-traits"></div>
     </div>
     <div class="field">
-      <label>Favorite treat</label>
+      <label>Favorite treats (pick as many as you like!)</label>
       <div class="pick-row greeny" id="h-treat">
-        <label><input type="radio" name="htreat" value="🍎 Apples" checked><span class="pick">🍎 Apples</span></label>
-        <label><input type="radio" name="htreat" value="🥕 Carrots"><span class="pick">🥕 Carrots</span></label>
-        <label><input type="radio" name="htreat" value="🍬 Peppermints"><span class="pick">🍬 Peppermints</span></label>
-        <label><input type="radio" name="htreat" value="🧁 Sugar cubes"><span class="pick">🧁 Sugar cubes</span></label>
-        <label><input type="radio" name="htreat" value="🤗 Nose boops"><span class="pick">🤗 Nose boops</span></label>
+        <label><input type="checkbox" name="htreat" value="🍎 Apples"><span class="pick">🍎 Apples</span></label>
+        <label><input type="checkbox" name="htreat" value="🥕 Carrots"><span class="pick">🥕 Carrots</span></label>
+        <label><input type="checkbox" name="htreat" value="🍬 Peppermints"><span class="pick">🍬 Peppermints</span></label>
+        <label><input type="checkbox" name="htreat" value="🧁 Sugar cubes"><span class="pick">🧁 Sugar cubes</span></label>
+        <label><input type="checkbox" name="htreat" value="🤗 Nose boops"><span class="pick">🤗 Nose boops</span></label>
       </div>
     </div>
     <div class="field">
@@ -906,7 +925,7 @@ footer .data-btns{display:flex;gap:10px;justify-content:center;margin-bottom:10p
 <!-- RIDE DIALOG -->
 <dialog id="dlg-ride">
   <form class="dlg-inner" id="form-ride" method="dialog">
-    <h2>Log a ride 🐎</h2>
+    <h2 id="ride-dlg-title">Log a ride 🐎</h2>
     <div class="field">
       <label for="r-horse">Which horse?</label>
       <select id="r-horse" required></select>
@@ -958,7 +977,7 @@ footer .data-btns{display:flex;gap:10px;justify-content:center;margin-bottom:10p
     </div>
     <div class="dlg-actions">
       <button type="button" class="ghost-btn" data-close>Never mind</button>
-      <button type="submit" class="cta green">Save this ride! 🎉</button>
+      <button type="submit" class="cta green" id="ride-save-btn">Save this ride! 🎉</button>
     </div>
   </form>
 </dialog>
@@ -1306,7 +1325,10 @@ function normalize(s){
   s.updatedAt=typeof s.updatedAt==='number'?s.updatedAt:0;
   s.mathLog=Array.isArray(s.mathLog)?s.mathLog.slice(-300):[];
   s.events=Array.isArray(s.events)?s.events:[];
-  s.horses.forEach(h=>{h.care=Array.isArray(h.care)?h.care:[]});
+  s.horses.forEach(h=>{
+    h.care=Array.isArray(h.care)?h.care:[];
+    if(!Array.isArray(h.treats))h.treats=(typeof h.treat==='string'&&h.treat)?[h.treat]:[];
+  });
   return s;
 }
 let state=load();
@@ -1395,7 +1417,7 @@ function render(){
   $('#stat-horses').textContent=state.horses.length;
   $('#stat-rides').textContent=state.rides.length;
   const mins=state.rides.reduce((a,r)=>a+r.minutes,0);
-  $('#stat-hours').textContent=(mins/60).toFixed(mins&&mins<60?1:0).replace(/\.0$/,'');
+  $('#stat-hours').textContent=(mins/60).toFixed(mins&&mins<600?1:0).replace(/\.0$/,'');
   $('#stat-badges').textContent=earnedBadges().length;
   $('#rider-btn').textContent=state.rider||'you';
   renderStable();renderJournal();renderGoals();renderWishes();renderBadges();renderStats();renderCal();
@@ -1546,7 +1568,7 @@ function renderStable(){
         </div>
       </div>
       ${h.traits.length?`<div class="chips">${h.traits.map(t=>`<span class="chip">${esc(t)}</span>`).join('')}</div>`:''}
-      <p class="horse-meta">Loves <b>${esc(h.treat)}</b> · <b>${n}</b> ride${n===1?'':'s'} together ${'💗'.repeat(Math.min(5,Math.max(1,Math.ceil(n/5))))}</p>
+      <p class="horse-meta">${(h.treats||[]).length?`Loves <b>${esc(h.treats.join(', '))}</b> · `:''}<b>${n}</b> ride${n===1?'':'s'} together ${'💗'.repeat(Math.min(5,Math.max(1,Math.ceil(n/5))))}</p>
       ${h.notes?`<p class="horse-meta">📝 ${esc(h.notes)}</p>`:''}
       <div class="card-actions">
         <button class="mini-btn" data-edit="${h.id}">✏️ Edit</button>
@@ -1608,10 +1630,12 @@ function renderJournal(){
         ${r.note?`<p class="ride-note">${esc(r.note)}</p>`:''}
         ${r.photo?`<img class="ride-photo" src="${r.photo}" alt="Photo from this ride">`:''}
       </div>
+      <button class="edit" data-editride="${r.id}" title="Edit this ride">✏️</button>
       <button class="del" data-delride="${r.id}" title="Delete this ride">✖</button>
     </article>`;
   }
   list.innerHTML=html;
+  list.querySelectorAll('[data-editride]').forEach(b=>b.addEventListener('click',()=>openRideEditDialog(b.dataset.editride)));
   list.querySelectorAll('[data-delride]').forEach(b=>b.addEventListener('click',()=>{
     if(confirm('Delete this ride from your journal?')){
       state.rides=state.rides.filter(r=>r.id!==b.dataset.delride);
@@ -1637,11 +1661,30 @@ function renderBadges(){
 function switchTab(name){
   document.querySelectorAll('.tab').forEach(t=>t.setAttribute('aria-selected',String(t.dataset.tab===name)));
   document.querySelectorAll('[role=tabpanel]').forEach(p=>p.hidden=(p.id!=='panel-'+name));
+  updateTabFocus();
   try{
     if(name==='horse')localStorage.setItem('hoofprints-tab',JSON.stringify({tab:'horse',horse:currentHorsePage}));
     else localStorage.setItem('hoofprints-tab',JSON.stringify({tab:name}));
   }catch(e){}
 }
+// roving tabindex + arrow keys, so the ARIA tablist really is keyboard-navigable
+function updateTabFocus(){
+  const tabs=[...document.querySelectorAll('.tab')];
+  const sel=tabs.find(t=>t.getAttribute('aria-selected')==='true')||tabs[0];
+  tabs.forEach(t=>t.tabIndex=(t===sel?0:-1));
+}
+updateTabFocus();
+document.querySelector('nav.tabs').addEventListener('keydown',e=>{
+  const dir={ArrowRight:1,ArrowDown:1,ArrowLeft:-1,ArrowUp:-1}[e.key];
+  if(dir===undefined&&e.key!=='Home'&&e.key!=='End')return;
+  const tabs=[...document.querySelectorAll('.tab')];
+  const i=tabs.indexOf(document.activeElement);
+  if(i<0)return;
+  e.preventDefault();
+  const j=e.key==='Home'?0:e.key==='End'?tabs.length-1:(i+dir+tabs.length)%tabs.length;
+  tabs[j].focus();
+  switchTab(tabs[j].dataset.tab);
+});
 document.querySelectorAll('.tab').forEach(t=>t.addEventListener('click',()=>switchTab(t.dataset.tab)));
 document.querySelectorAll('.stat[data-goto]').forEach(el=>{
   const go=()=>switchTab(el.dataset.goto);
@@ -1652,7 +1695,7 @@ document.querySelectorAll('.stat[data-goto]').forEach(el=>{
 /* ================= horse dialog ================= */
 const dlgHorse=$('#dlg-horse');let editingHorse=null;
 // build coat swatches + trait chips once
-$('#h-coat').innerHTML=COATS.map((c,i)=>`<label><input type="radio" name="hcoat" value="${c.id}" ${i===0?'checked':''}><span class="swatch" style="background:${c.bg}">${c.name.slice(0,4)}</span></label>`).join('');
+$('#h-coat').innerHTML=COATS.map((c,i)=>`<label title="${esc(c.name)}"><input type="radio" name="hcoat" value="${c.id}" ${i===0?'checked':''}><span class="swatch" style="background:${c.bg}"></span><span class="swatch-name">${esc(c.name)}</span></label>`).join('');
 $('#h-traits').innerHTML=TRAITS.map(t=>`<label><input type="checkbox" name="htrait" value="${t}"><span class="pick">${t}</span></label>`).join('');
 
 function openHorseDialog(id){
@@ -1666,8 +1709,7 @@ function openHorseDialog(id){
   document.querySelector(`#h-size input[value="${h?h.size:'Pony'}"]`).checked=true;
   document.querySelector(`#h-coat input[value="${h?h.coat:'bay'}"]`).checked=true;
   document.querySelectorAll('#h-traits input').forEach(i=>i.checked=!!(h&&h.traits.includes(i.value)));
-  const treatEl=document.querySelector(`#h-treat input[value="${h?h.treat:'🍎 Apples'}"]`);
-  (treatEl||document.querySelector('#h-treat input')).checked=true;
+  document.querySelectorAll('#h-treat input').forEach(i=>i.checked=!!(h&&(h.treats||[]).includes(i.value)));
   pendingHorsePhoto=h&&h.photo?h.photo:null;
   setPhotoPrev('#h-photo-prev','#h-photo-clear',pendingHorsePhoto,'🐴');
   dlgHorse.showModal();
@@ -1680,7 +1722,7 @@ $('#form-horse').addEventListener('submit',e=>{
     size:document.querySelector('#h-size input:checked').value,
     coat:document.querySelector('#h-coat input:checked').value,
     traits:[...document.querySelectorAll('#h-traits input:checked')].map(i=>i.value),
-    treat:document.querySelector('#h-treat input:checked').value,
+    treats:[...document.querySelectorAll('#h-treat input:checked')].map(i=>i.value),
     notes:$('#h-notes').value.trim(),
     photo:pendingHorsePhoto
   };
@@ -1690,22 +1732,52 @@ $('#form-horse').addEventListener('submit',e=>{
 });
 
 /* ================= ride dialog ================= */
-const dlgRide=$('#dlg-ride');
+const dlgRide=$('#dlg-ride');let editingRide=null;
 $('#r-activity').innerHTML=ACTIVITIES.map((a,i)=>`<label><input type="radio" name="ract" value="${a.id}" ${i===0?'checked':''}><span class="pick">${a.emoji} ${a.name}</span></label>`).join('');
+function fillRideHorseSelect(){
+  $('#r-horse').innerHTML=state.horses.map(h=>`<option value="${h.id}">${esc(h.name)}</option>`).join('');
+}
 function openRideDialog(preselectId){
   if(!state.horses.length){toast('Add a horse to your stable first! 🐴');switchTab('stable');return}
-  $('#r-horse').innerHTML=state.horses.map(h=>`<option value="${h.id}">${esc(h.name)}</option>`).join('');
+  editingRide=null;
+  $('#ride-dlg-title').textContent='Log a ride 🐎';
+  $('#ride-save-btn').textContent='Save this ride! 🎉';
+  fillRideHorseSelect();
   if(preselectId&&horseById(preselectId))$('#r-horse').value=preselectId;
   $('#r-date').value=new Date().toISOString().slice(0,10);
+  $('#r-mins').value=30;
+  document.querySelector('#r-activity input[value="lesson"]').checked=true;
+  document.querySelector('#r-mood input[value="3"]').checked=true;
+  document.querySelector('#r-weather input[value="sun"]').checked=true;
   $('#r-note').value='';
   pendingRidePhoto=null;
   setPhotoPrev('#r-photo-prev','#r-photo-clear',null,'📷');
   dlgRide.showModal();
 }
+function openRideEditDialog(id){
+  const r=state.rides.find(x=>x.id===id);
+  if(!r)return;
+  editingRide=id;
+  $('#ride-dlg-title').textContent='Edit this ride ✏️';
+  $('#ride-save-btn').textContent='Save changes 💾';
+  fillRideHorseSelect();
+  if(horseById(r.horseId))$('#r-horse').value=r.horseId;
+  $('#r-date').value=r.date;
+  $('#r-mins').value=r.minutes;
+  const act=document.querySelector(`#r-activity input[value="${r.activity}"]`);
+  (act||document.querySelector('#r-activity input[value="lesson"]')).checked=true;
+  const mood=document.querySelector(`#r-mood input[value="${r.mood}"]`);
+  (mood||document.querySelector('#r-mood input[value="3"]')).checked=true;
+  const wx=document.querySelector(`#r-weather input[value="${r.weather||'sun'}"]`);
+  (wx||document.querySelector('#r-weather input[value="sun"]')).checked=true;
+  $('#r-note').value=r.note||'';
+  pendingRidePhoto=r.photo||null;
+  setPhotoPrev('#r-photo-prev','#r-photo-clear',pendingRidePhoto,'📷');
+  dlgRide.showModal();
+}
 $('#btn-add-ride').addEventListener('click',()=>openRideDialog());
 $('#form-ride').addEventListener('submit',e=>{
-  const ride={
-    id:uid(),created:Date.now(),
+  const data={
     horseId:$('#r-horse').value,
     date:$('#r-date').value,
     activity:document.querySelector('#r-activity input:checked').value,
@@ -1715,12 +1787,21 @@ $('#form-ride').addEventListener('submit',e=>{
     weather:document.querySelector('#r-weather input:checked').value,
     photo:pendingRidePhoto
   };
-  state.rides.push(ride);
-  persist();render();
-  const h=horseById(ride.horseId);
-  toast(`Ride with ${h?h.name:'your horse'} saved! 🐎`);confetti(60);
-  checkNewBadges();
-  switchTab('journal');
+  if(editingRide){
+    const r=state.rides.find(x=>x.id===editingRide);
+    if(r)Object.assign(r,data); // id + created stay as they were
+    editingRide=null;
+    persist();render();
+    toast('Ride updated! ✨');
+    checkNewBadges();
+  }else{
+    state.rides.push({id:uid(),created:Date.now(),...data});
+    persist();render();
+    const h=horseById(data.horseId);
+    toast(`Ride with ${h?h.name:'your horse'} saved! 🐎`);confetti(60);
+    checkNewBadges();
+    switchTab('journal');
+  }
 });
 
 /* ================= goal dialog ================= */
@@ -2254,7 +2335,7 @@ function renderHorsePage(){
       <p class="sub">${esc(h.breed||'Mystery breed')} · ${esc(h.size)} · ${esc((COATS.find(c=>c.id===h.coat)||{}).name||'')} coat</p>
       ${h.traits.length?`<div class="chips">${h.traits.map(t=>`<span class="chip">${esc(t)}</span>`).join('')}</div>`:''}
       <div class="hero-facts">
-        <p>Loves <b>${esc(h.treat)}</b></p>
+        ${(h.treats||[]).length?`<p>Loves <b>${esc(h.treats.join(', '))}</b></p>`:''}
         ${first?`<p>Friends since <b>${new Date(first+'T12:00:00').toLocaleDateString(undefined,{day:'numeric',month:'long',year:'numeric'})}</b> — that's <b>${daysFriends}</b> day${daysFriends===1?'':'s'} of friendship 💗</p>`:'<p>No rides together yet — the adventure is about to begin! ✨</p>'}
       </div>
       ${h.notes?`<div class="horse-note">${esc(h.notes)}</div>`:''}
@@ -2319,13 +2400,13 @@ function renderStats(){
   const fav=favId&&horseById(favId);
   $('#st-fav').textContent=fav?fav.name.split(' ')[0]:'—';
 
-  // last 8 weeks bar chart
+  // last 8 weeks bar chart (pixel heights — .bar-col has no definite height for % to resolve against)
   const byWeek={};state.rides.forEach(r=>{const w=weekIdx(r.date);byWeek[w]=(byWeek[w]||0)+r.minutes});
   const maxW=Math.max(1,...Array.from({length:8},(_,i)=>byWeek[thisWeek-7+i]||0));
   $('#chart-weeks').innerHTML=Array.from({length:8},(_,i)=>{
     const w=thisWeek-7+i,m=byWeek[w]||0;
     const lbl=i===7?'now':(7-i)+'w';
-    return `<div class="bar-col"><b>${m||''}</b><i style="height:${Math.round(m/maxW*100)}%"></i><span>${lbl}</span></div>`;
+    return `<div class="bar-col"><b>${m||''}</b><i style="height:${Math.round(m/maxW*88)}px"></i><span>${lbl}</span></div>`;
   }).join('');
 
   // activity breakdown
@@ -2381,7 +2462,7 @@ function renderCal(){
     const ds=`${y}-${pad(m+1)}-${pad(d)}`;
     const dayEvs=sortByTime(evtsOn(ds));
     const rideMarks=(ridesBy[ds]||[]).map(r=>(ACTIVITIES.find(a=>a.id===r.activity)||{}).emoji||'🐎').slice(0,4).join('');
-    const pills=dayEvs.slice(0,2).map(e=>`<span class="cal-pill">${evType(e.type).emoji} ${e.time?fmtTime(e.time)+' ':''}${esc(e.title)}</span>`).join('');
+    const pills=dayEvs.slice(0,2).map(e=>`<span class="cal-pill"><span class="pill-emoji">${evType(e.type).emoji}${e.time?` <span class="pill-time">${fmtTime(e.time)}</span>`:''} </span>${esc(e.title)}</span>`).join('');
     const more=dayEvs.length>2?`<span class="cal-more">+${dayEvs.length-2} more</span>`:'';
     html+=`<button class="cal-day${ds===today?' today':''}${ds===calSelected?' selected':''}" data-day="${ds}"><span class="dnum">${d}</span>${pills}${more}${rideMarks?`<span class="cal-rides">${rideMarks}</span>`:''}</button>`;
   }
@@ -2405,7 +2486,7 @@ function renderCal(){
     det.innerHTML=inner;
     det.querySelectorAll('[data-delev]').forEach(b=>b.addEventListener('click',()=>{
       const ev=state.events.find(e=>e.id===b.dataset.delev);
-      if(ev&&ev.repeat&&ev.repeat!=='none'&&!confirm(`Remove “${ev.title}” and all its repeats?`))return;
+      if(ev&&!confirm(ev.repeat&&ev.repeat!=='none'?`Remove “${ev.title}” and all its repeats?`:`Remove “${ev.title}” from the calendar?`))return;
       state.events=state.events.filter(e=>e.id!==b.dataset.delev);persist();render();
     }));
   }
@@ -2426,7 +2507,7 @@ function renderCal(){
   }).join(''):'<p class="horse-meta">Nothing planned yet. Add a lesson, a show, or a pony party! 🎈</p>';
   $('#upcoming-list').querySelectorAll('[data-delev]').forEach(b=>b.addEventListener('click',()=>{
     const ev=state.events.find(e=>e.id===b.dataset.delev);
-    if(ev&&ev.repeat&&ev.repeat!=='none'&&!confirm(`Remove “${ev.title}” and all its repeats?`))return;
+    if(ev&&!confirm(ev.repeat&&ev.repeat!=='none'?`Remove “${ev.title}” and all its repeats?`:`Remove “${ev.title}” from the calendar?`))return;
     state.events=state.events.filter(e=>e.id!==b.dataset.delev);persist();render();
   }));
 }
@@ -2638,7 +2719,14 @@ function loadSyncCfg(){
   }catch(e){}
   return {url:'',secret:'',auto:true};
 }
-function saveSyncCfg(){try{localStorage.setItem(SYNC_KEY,JSON.stringify(syncCfg))}catch(e){}}
+function saveSyncCfg(){try{localStorage.setItem(SYNC_KEY,JSON.stringify(syncCfg))}catch(e){}updateSaveNote()}
+function updateSaveNote(){
+  const el=$('#save-note');
+  if(el)el.textContent=syncCfg&&syncCfg.url
+    ?'Saved on this device — and to your Google Sheet when ☁️ sync is on.'
+    :'Everything is saved right here on this device.';
+}
+updateSaveNote();
 function syncUrl(){return syncCfg.url+(syncCfg.url.includes('?')?'&':'?')+'secret='+encodeURIComponent(syncCfg.secret)}
 function readSyncForm(){
   syncCfg.url=$('#sync-url').value.trim();
@@ -2818,7 +2906,7 @@ applyTheme(state.theme);
 render();
 try{
   const saved=JSON.parse(localStorage.getItem('hoofprints-tab'));
-  if(saved&&saved.tab==='horse')fixed: {
+  if(saved&&saved.tab==='horse'){
     if(saved.horse&&horseById(saved.horse))openHorsePage(saved.horse);
     else switchTab('stable');
   }

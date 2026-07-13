@@ -88,7 +88,7 @@ function writeReadableTabs_(ss, d) {
   fill_(ss, 'Horses 🐴',
     ['Name', 'Breed', 'Size', 'Coat', 'Personality', 'Favorite treat', 'Notes', 'Has photo'],
     (d.horses || []).map(function (h) {
-      return [h.name, h.breed, h.size, h.coat, (h.traits || []).join(', '), h.treat, h.notes, h.photo ? 'yes' : ''];
+      return [h.name, h.breed, h.size, h.coat, (h.traits || []).join(', '), (h.treats || [h.treat]).filter(Boolean).join(', '), h.notes, h.photo ? 'yes' : ''];
     }));
 
   fill_(ss, 'Rides 📖',
