@@ -122,6 +122,7 @@ function writeReadableTabs_(ss, d) {
     ['Date', 'Mode', 'Score', 'Out of', 'Perfect', 'Time'],
     (d.mathLog || []).slice().reverse().map(function (m) {
       var mode = m.mode === 'retake' ? 'Tricky ones 🔁'
+        : m.mode === 'facts' ? 'Math facts 🥕'
         : (String(m.mode).indexOf('facts-') === 0 ? '×' + String(m.mode).slice(6) + ' facts'
         : 'Mixed · ' + ({ pony: 'Pony 🐴', horse: 'Horse 🐎', unicorn: 'Unicorn 🦄' }[m.mode] || m.mode));
       var t = Math.floor((m.seconds || 0) / 60) + 'm ' + ((m.seconds || 0) % 60) + 's';
