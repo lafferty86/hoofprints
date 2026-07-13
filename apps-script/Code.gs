@@ -113,10 +113,11 @@ function writeReadableTabs_(ss, d) {
   careRows.sort(function (a, b) { return String(b[0]).localeCompare(String(a[0])); });
   fill_(ss, 'Care 🩺', ['Date', 'Horse', 'What', 'Note'], careRows);
 
+  var REPEATS = { weekly: 'Every week 🔁', biweekly: 'Every 2 weeks 🔁', monthly: 'Every month 🔁' };
   fill_(ss, 'Calendar 🗓️',
-    ['Date', 'What', 'Kind'],
+    ['Starts', 'What', 'Kind', 'Repeats', 'Until'],
     (d.events || []).slice().sort(function (a, b) { return String(a.date).localeCompare(String(b.date)); })
-      .map(function (e) { return [e.date, e.title, EVENTS[e.type] || e.type]; }));
+      .map(function (e) { return [e.date, e.title, EVENTS[e.type] || e.type, REPEATS[e.repeat] || '', e.until || '']; }));
 
   fill_(ss, 'Math 🥕',
     ['Date', 'Mode', 'Score', 'Out of', 'Perfect', 'Time'],

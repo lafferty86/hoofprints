@@ -1072,8 +1072,21 @@ footer .data-btns{display:flex;gap:10px;justify-content:center;margin-bottom:10p
       <div class="pick-row" id="ev-type"></div>
     </div>
     <div class="field">
-      <label for="ev-date">When?</label>
+      <label for="ev-date">When? (first time, if it repeats)</label>
       <input type="date" id="ev-date" required>
+    </div>
+    <div class="field">
+      <label>Does it repeat?</label>
+      <div class="pick-row" id="ev-repeat">
+        <label><input type="radio" name="evrep" value="none" checked><span class="pick">📌 Just once</span></label>
+        <label><input type="radio" name="evrep" value="weekly"><span class="pick">🔁 Every week</span></label>
+        <label><input type="radio" name="evrep" value="biweekly"><span class="pick">🔁 Every 2 weeks</span></label>
+        <label><input type="radio" name="evrep" value="monthly"><span class="pick">🔁 Every month</span></label>
+      </div>
+    </div>
+    <div class="field" id="ev-until-wrap" hidden>
+      <label for="ev-until">Until when? (leave empty for "keeps going")</label>
+      <input type="date" id="ev-until">
     </div>
     <div class="dlg-actions">
       <button type="button" class="ghost-btn" data-close>Never mind</button>
@@ -1301,6 +1314,34 @@ function streaks(s){
   while(start!==null&&set.has(start)){current++;start--}
   return {current,best};
 }
+
+function addDays(ds,n){
+  const d=new Date(ds+'T12:00:00');d.setDate(d.getDate()+n);
+  const p=x=>String(x).padStart(2,'0');
+  return `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())}`;
+}
+function occursOn(e,ds){
+  if(ds<e.date)return false;
+  if(e.until&&ds>e.until)return false;
+  const rep=e.repeat||'none';
+  if(rep==='none')return ds===e.date;
+  if(rep==='weekly')return (dayNum(ds)-dayNum(e.date))%7===0;
+  if(rep==='biweekly')return (dayNum(ds)-dayNum(e.date))%14===0;
+  if(rep==='monthly')return ds.slice(8)===e.date.slice(8);
+  return ds===e.date;
+}
+function nextOccurrence(e,fromDs){
+  const rep=e.repeat||'none';
+  if(rep==='none')return e.date>=fromDs?e.date:null;
+  let ds=fromDs<e.date?e.date:fromDs;
+  for(let i=0;i<=400;i++){
+    if(e.until&&ds>e.until)return null;
+    if(occursOn(e,ds))return ds;
+    ds=addDays(ds,1);
+  }
+  return null;
+}
+const REPEAT_LABEL={weekly:'every week',biweekly:'every 2 weeks',monthly:'every month'};
 
 /* ================= badge tracking ================= */
 function earnedBadges(){return BADGES.filter(b=>b.test(state))}
@@ -2226,9 +2267,9 @@ function renderCal(){
   const daysIn=new Date(y,m+1,0).getDate();
   const today=todayStr();
   const pad=n=>String(n).padStart(2,'0');
-  const ridesBy={},evBy={};
+  const ridesBy={};
   state.rides.forEach(r=>{(ridesBy[r.date]=ridesBy[r.date]||[]).push(r)});
-  state.events.forEach(e=>{(evBy[e.date]=evBy[e.date]||[]).push(e)});
+  const evtsOn=ds=>state.events.filter(e=>occursOn(e,ds));
   let html='';
   for(const d of ['Mo','Tu','We','Th','Fr','Sa','Su'])html+=`<div class="cal-dow">${d}</div>`;
   for(let i=0;i<firstDow;i++)html+='<div class="cal-day blank"></div>';
@@ -2236,7 +2277,7 @@ function renderCal(){
     const ds=`${y}-${pad(m+1)}-${pad(d)}`;
     const marks=[
       ...(ridesBy[ds]||[]).map(r=>(ACTIVITIES.find(a=>a.id===r.activity)||{}).emoji||'🐎'),
-      ...(evBy[ds]||[]).map(e=>evType(e.type).emoji)
+      ...evtsOn(ds).map(e=>evType(e.type).emoji)
     ].slice(0,3).join('');
     html+=`<button class="cal-day${ds===today?' today':''}${ds===calSelected?' selected':''}" data-day="${ds}">${d}<span class="mini">${marks}</span></button>`;
   }
@@ -2249,33 +2290,39 @@ function renderCal(){
   if(!calSelected){det.innerHTML=''}
   else{
     const d=new Date(calSelected+'T12:00:00');
-    const rides=ridesBy[calSelected]||[],evs=evBy[calSelected]||[];
+    const rides=ridesBy[calSelected]||[],evs=evtsOn(calSelected);
     let inner=`<div class="month-label">${d.toLocaleDateString(undefined,{weekday:'long',day:'numeric',month:'long'})}</div>`;
     if(!rides.length&&!evs.length)inner+='<p class="horse-meta">Nothing here yet — a perfect day for a ride? 🐴</p>';
-    inner+=evs.map(e=>`<div class="event-row"><span>${evType(e.type).emoji}</span><h3>${esc(e.title)}</h3><button class="del" data-delev="${e.id}" title="Remove">✖</button></div>`).join('');
+    inner+=evs.map(e=>`<div class="event-row"><span>${evType(e.type).emoji}</span><h3>${esc(e.title)}${e.repeat&&e.repeat!=='none'?` <span class="chip gold">🔁 ${REPEAT_LABEL[e.repeat]}</span>`:''}</h3><button class="del" data-delev="${e.id}" title="Remove">✖</button></div>`).join('');
     inner+=rides.map(r=>{
       const h=horseById(r.horseId),a=ACTIVITIES.find(x=>x.id===r.activity)||ACTIVITIES[0];
       return `<div class="event-row"><span>${a.emoji}</span><h3>${a.name} with ${esc(h?h.name:'?')}</h3><span class="when">${r.minutes} min ${MOODS[r.mood]||''}</span></div>`;
     }).join('');
     det.innerHTML=inner;
     det.querySelectorAll('[data-delev]').forEach(b=>b.addEventListener('click',()=>{
+      const ev=state.events.find(e=>e.id===b.dataset.delev);
+      if(ev&&ev.repeat&&ev.repeat!=='none'&&!confirm(`Remove “${ev.title}” and all its repeats?`))return;
       state.events=state.events.filter(e=>e.id!==b.dataset.delev);persist();render();
     }));
   }
   // upcoming
-  const up=state.events.filter(e=>e.date>=today).sort((a,b)=>a.date.localeCompare(b.date)).slice(0,8);
-  $('#upcoming-list').innerHTML=up.length?up.map(e=>{
-    const days=dayNum(e.date)-dayNum(today);
+  const up=state.events.map(e=>({e,next:nextOccurrence(e,today)})).filter(x=>x.next)
+    .sort((a,b)=>a.next.localeCompare(b.next)).slice(0,8);
+  $('#upcoming-list').innerHTML=up.length?up.map(({e,next})=>{
+    const days=dayNum(next)-dayNum(today);
     const cd=days===0?'today! 🎉':days===1?'tomorrow':`in ${days} days`;
+    const rep=e.repeat&&e.repeat!=='none'?` · 🔁 ${REPEAT_LABEL[e.repeat]}`:'';
     return `<div class="event-row">
       <span>${evType(e.type).emoji}</span>
       <h3>${esc(e.title)}</h3>
-      <span class="when">${new Date(e.date+'T12:00:00').toLocaleDateString(undefined,{day:'numeric',month:'short'})}</span>
+      <span class="when">${new Date(next+'T12:00:00').toLocaleDateString(undefined,{day:'numeric',month:'short'})}${rep}</span>
       <span class="countdown${days===0?' today':''}">${cd}</span>
       <button class="del" data-delev="${e.id}" title="Remove">✖</button>
     </div>`;
   }).join(''):'<p class="horse-meta">Nothing planned yet. Add a lesson, a show, or a pony party! 🎈</p>';
   $('#upcoming-list').querySelectorAll('[data-delev]').forEach(b=>b.addEventListener('click',()=>{
+    const ev=state.events.find(e=>e.id===b.dataset.delev);
+    if(ev&&ev.repeat&&ev.repeat!=='none'&&!confirm(`Remove “${ev.title}” and all its repeats?`))return;
     state.events=state.events.filter(e=>e.id!==b.dataset.delev);persist();render();
   }));
 }
@@ -2287,17 +2334,28 @@ $('#ev-type').innerHTML=EVENT_TYPES.map((t,i)=>`<label><input type="radio" name=
 $('#btn-add-event').addEventListener('click',()=>{
   $('#ev-title').value='';
   $('#ev-date').value=calSelected||todayStr();
+  document.querySelector('#ev-repeat input[value="none"]').checked=true;
+  $('#ev-until').value='';
+  $('#ev-until-wrap').hidden=true;
   $('#dlg-event').showModal();
 });
+document.querySelectorAll('#ev-repeat input').forEach(i=>i.addEventListener('change',()=>{
+  $('#ev-until-wrap').hidden=i.value==='none';
+}));
 $('#form-event').addEventListener('submit',()=>{
-  state.events.push({
+  const repeat=document.querySelector('#ev-repeat input:checked').value;
+  const ev={
     id:uid(),
     title:$('#ev-title').value.trim()||'Something fun',
     type:document.querySelector('#ev-type input:checked').value,
-    date:$('#ev-date').value
-  });
+    date:$('#ev-date').value,
+    repeat
+  };
+  const until=$('#ev-until').value;
+  if(repeat!=='none'&&until)ev.until=until;
+  state.events.push(ev);
   persist();render();
-  toast('Added to the calendar! 🗓️');
+  toast(repeat==='none'?'Added to the calendar! 🗓️':`Added — ${REPEAT_LABEL[repeat]} 🔁`);
 });
 
 /* ================= care log ================= */
