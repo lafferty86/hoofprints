@@ -1145,7 +1145,7 @@ footer .data-btns{display:flex;gap:10px;justify-content:center;margin-bottom:10p
 <dialog id="dlg-sync">
   <div class="dlg-inner">
     <h2>Cloud sync ☁️</h2>
-    <p class="sync-note">Keep the whole barn safe in a Google Sheet and use it on more than one device. A grown-up sets it up once — see the <a href="https://github.com/lafferty86/best-repo-ever#cloud-sync-google-sheets" target="_blank" rel="noopener">setup guide</a>.</p>
+    <p class="sync-note">Keep the whole barn safe in a Google Sheet and use it on more than one device. A grown-up sets it up once — see the <a href="https://github.com/lafferty86/hoofprints#cloud-sync-google-sheets" target="_blank" rel="noopener">setup guide</a>. Tip: paste a whole 🔗 setup link into the URL box below and it unpacks itself.</p>
     <div class="field">
       <label for="sync-url">Web app URL</label>
       <input type="text" id="sync-url" placeholder="https://script.google.com/macros/s/…/exec">
@@ -2785,6 +2785,22 @@ function openSyncDialog(){
   $('#dlg-sync').showModal();
 }
 $('#btn-sync').addEventListener('click',()=>requirePass(openSyncDialog));
+$('#sync-url').addEventListener('input',()=>{
+  const v=$('#sync-url').value;
+  const m=v.match(/#setup=([A-Za-z0-9+/=]+)/);
+  if(!m)return;
+  try{
+    const cfg=JSON.parse(decodeURIComponent(atob(m[1])));
+    if(cfg&&typeof cfg.u==='string'&&cfg.u.startsWith('https://')){
+      $('#sync-url').value=cfg.u;
+      $('#sync-secret').value=String(cfg.s||'');
+      $('#sync-auto').checked=true;
+      readSyncForm();
+      syncStatus('Setup link unpacked! ✨ Now tap “⬇ Get from cloud”.');
+      toast('Setup link unpacked! ☁️✨');
+    }
+  }catch(e){}
+});
 $('#sync-push').addEventListener('click',()=>{readSyncForm();pushCloud(true)});
 $('#sync-link').addEventListener('click',()=>{
   readSyncForm();
