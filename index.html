@@ -803,7 +803,7 @@ footer .data-btns{display:flex;gap:10px;justify-content:center;margin-bottom:10p
       </div>
       <div class="card fun-card">
         <h3>🥕 Carrot Count</h3>
-        <p class="horse-meta">Math facts! Plus, minus, times &amp; divide — feed the pony 10 carrots.</p>
+        <p class="horse-meta">Pick ×, ÷, + or − and the fact to drill — 20 questions a round!</p>
         <p class="chips"><span class="chip green" id="math-best-chip">Best: —</span></p>
         <button class="cta" id="btn-math">Play! 🧮</button>
       </div>
@@ -1267,7 +1267,7 @@ const BADGES=[
   {id:'photo',   emoji:'📸', name:'Say Neigh-se!',     desc:'Add a photo to a horse or a ride',     test:s=>s.horses.some(h=>h.photo)||s.rides.some(r=>r.photo)},
   {id:'quiz',    emoji:'🧠', name:'Quiz Whiz',         desc:'Score a perfect 5/5 in the Pony Quiz',  test:s=>(s.games||{}).perfectQuiz>=1},
   {id:'pairs',   emoji:'👀', name:'Sharp Eyes',        desc:'Win Stable Pairs in 12 flips or fewer', test:s=>{const b=(s.games||{}).bestMemory;return b>0&&b<=12}},
-  {id:'math',    emoji:'🥕', name:'Carrot Counter',    desc:'Get a perfect 10/10 in Carrot Count',   test:s=>(s.games||{}).perfectMath>=1},
+  {id:'math',    emoji:'🥕', name:'Carrot Counter',    desc:'Get a perfect round in Carrot Count',   test:s=>(s.games||{}).perfectMath>=1},
   {id:'flyer',   emoji:'🏇', name:'High Flyer',        desc:'Clear 10 fences in one Gallop! run',    test:s=>(s.games||{}).bestJump>=10},
   {id:'streak3', emoji:'🔥', name:'Hot Streak',        desc:'Ride 3 weeks in a row',                 test:s=>streaks(s).best>=3},
   {id:'streak8', emoji:'🌋', name:'Unstoppable',       desc:'Ride 8 weeks in a row',                 test:s=>streaks(s).best>=8},
@@ -1289,7 +1289,8 @@ function normalize(s){
   s.goals=Array.isArray(s.goals)?s.goals:[];
   s.wishes=Array.isArray(s.wishes)?s.wishes:[];
   s.theme=THEMES.some(t=>t.id===s.theme)?s.theme:'party';
-  s.games=Object.assign({quizBest:0,perfectQuiz:0,bestMemory:0,bestJump:0,mathBest:0,perfectMath:0},(s.games&&typeof s.games==='object')?s.games:{});
+  s.games=Object.assign({quizBest:0,perfectQuiz:0,bestMemory:0,bestJump:0,mathBest:0,perfectMath:0,mathBestPct:0},(s.games&&typeof s.games==='object')?s.games:{});
+  if(!s.games.mathBestPct&&s.games.mathBest)s.games.mathBestPct=Math.min(100,s.games.mathBest*10);
   s.updatedAt=typeof s.updatedAt==='number'?s.updatedAt:0;
   s.mathLog=Array.isArray(s.mathLog)?s.mathLog.slice(-300):[];
   s.events=Array.isArray(s.events)?s.events:[];
@@ -1389,7 +1390,7 @@ function render(){
   if(currentHorsePage)renderHorsePage();
   $('#quiz-best-chip').textContent=state.games.quizBest?`Best: ${state.games.quizBest}/5`:'Best: —';
   $('#mem-best-chip').textContent=state.games.bestMemory?`Best: ${state.games.bestMemory} flips`:'Best: —';
-  $('#math-best-chip').textContent=state.games.mathBest?`Best: ${state.games.mathBest}/10`:'Best: —';
+  $('#math-best-chip').textContent=state.games.mathBestPct?`Best: ${state.games.mathBestPct}%`:'Best: —';
   $('#jump-best-chip').textContent=`Best: ${state.games.bestJump} fence${state.games.bestJump===1?'':'s'}`;
 }
 
@@ -1974,6 +1975,12 @@ $('#btn-mem').addEventListener('click',()=>{startMem();$('#dlg-mem').showModal()
 $('#mem-restart').addEventListener('click',startMem);
 
 /* ================= games: carrot count ================= */
+const MATH_OPS=[
+  {id:'mul',sign:'×',emoji:'✖️',name:'Multiplication'},
+  {id:'div',sign:'÷',emoji:'➗',name:'Division'},
+  {id:'add',sign:'+',emoji:'➕',name:'Addition'},
+  {id:'sub',sign:'−',emoji:'➖',name:'Subtraction'}
+];
 let mathRound=null;
 function makeOpts(ans){
   const ri=n=>1+Math.floor(Math.random()*n);
@@ -1986,28 +1993,66 @@ function makeOpts(ans){
   while(opts.size<4)opts.add(ans+opts.size);
   return shuffle([...opts]);
 }
-function mathQuestion(){
-  const ri=n=>1+Math.floor(Math.random()*n);
-  const op=['+','−','×','÷'][Math.floor(Math.random()*4)];
-  let a,b;
-  if(op==='+'){a=ri(10);b=ri(10)}
-  else if(op==='−'){b=ri(10);a=b+ri(10)}
-  else if(op==='×'){a=ri(12);b=ri(12)}
-  else{b=ri(12);a=b*ri(12)}
-  const ans=op==='+'?a+b:op==='−'?a-b:op==='×'?a*b:a/b;
-  return {text:`${a} ${op} ${b} = ?`,ans};
+function factQuestion(op,n,k){
+  if(op==='mul')return{text:`${n} × ${k} = ?`,ans:n*k};
+  if(op==='div')return{text:`${n*k} ÷ ${n} = ?`,ans:k};
+  if(op==='add')return{text:`${n} + ${k} = ?`,ans:n+k};
+  return{text:`${n+k} − ${n} = ?`,ans:k};
 }
-window._mathQ=mathQuestion;
+function buildRound(op,fact){
+  const ri=n=>1+Math.floor(Math.random()*n);
+  const qs=[];
+  if(fact==='all'){
+    for(let i=0;i<20;i++)qs.push(factQuestion(op,ri(12),ri(12)));
+  }else{
+    const deck=[...shuffle([1,2,3,4,5,6,7,8,9,10,11,12]),...shuffle([1,2,3,4,5,6,7,8,9,10,11,12])].slice(0,20);
+    for(const k of deck)qs.push(factQuestion(op,fact,k));
+  }
+  return qs;
+}
+window._mathBuild=buildRound;
 function modeLabel(mode){
-  return mode==='retake'?'Tricky ones 🔁':'Math facts 🥕';
+  if(mode==='retake')return 'Tricky ones 🔁';
+  const m=String(mode).match(/^(mul|div|add|sub)-(all|\d+)$/);
+  if(m){
+    const op=MATH_OPS.find(o=>o.id===m[1]);
+    return m[2]==='all'?`${op.sign} mixed 🎲`:`${op.sign}${m[2]} facts`;
+  }
+  return 'Math facts 🥕';
 }
 function startMathRound(mode,qlist){
-  mathRound={mode,qlist:qlist||null,idx:0,score:0,wrongs:[],total:qlist?qlist.length:10,start:Date.now()};
+  mathRound={mode,qlist,idx:0,score:0,wrongs:[],total:qlist.length,start:Date.now()};
   renderMathQ();
 }
 function startMath(){
-  startMathRound('facts');
+  showOpScreen();
   $('#dlg-math').showModal();
+}
+function showOpScreen(){
+  mathRound=null;
+  $('#math-body').innerHTML=`
+    <p class="horse-meta" style="text-align:center">What do you want to practice?</p>
+    <div class="quiz-opts" style="margin-top:12px">
+      ${MATH_OPS.map(o=>`<button class="quiz-opt" style="text-align:center;font-family:var(--font-display);font-weight:800;font-size:1.1rem" data-mop="${o.id}">${o.emoji} ${o.name}</button>`).join('')}
+    </div>`;
+  $('#math-body').querySelectorAll('[data-mop]').forEach(b=>b.addEventListener('click',()=>showFactScreen(b.dataset.mop)));
+}
+function showFactScreen(op){
+  const o=MATH_OPS.find(x=>x.id===op);
+  $('#math-body').innerHTML=`
+    <p class="quiz-progress">${o.emoji} ${o.name} — pick the fact to practice (20 questions)</p>
+    <div class="pick-row" style="margin-bottom:12px">
+      ${[1,2,3,4,5,6,7,8,9,10,11,12].map(n=>`<button class="mini-btn" data-mfact="${n}">${o.sign}${n}</button>`).join('')}
+    </div>
+    <div class="quiz-opts">
+      <button class="quiz-opt" style="text-align:center" data-mfact="all">🎲 All of them — random mix</button>
+      <button class="quiz-opt" style="text-align:center" id="math-back">← Pick a different sign</button>
+    </div>`;
+  $('#math-body').querySelectorAll('[data-mfact]').forEach(b=>b.addEventListener('click',()=>{
+    const f=b.dataset.mfact==='all'?'all':parseInt(b.dataset.mfact,10);
+    startMathRound(`${op}-${f}`,buildRound(op,f));
+  }));
+  $('#math-back').addEventListener('click',showOpScreen);
 }
 function renderMathQ(){
   const r=mathRound;
@@ -2059,7 +2104,8 @@ function endMath(){
   const rt=$('#math-retake');
   if(rt)rt.addEventListener('click',()=>startMathRound('retake',shuffle(r.wrongs)));
   if(!isRetake){
-    if(r.score>state.games.mathBest)state.games.mathBest=r.score;
+    const pct=Math.round(r.score/r.total*100);
+    if(pct>state.games.mathBestPct)state.games.mathBestPct=pct;
     if(perfect){state.games.perfectMath++;confetti(120)}
   }else if(perfect)confetti(80);
   state.mathLog.push({date:new Date().toISOString(),mode:r.mode,score:r.score,total:r.total,seconds});

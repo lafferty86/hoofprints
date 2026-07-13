@@ -122,10 +122,12 @@ function writeReadableTabs_(ss, d) {
   fill_(ss, 'Math 🥕',
     ['Date', 'Mode', 'Score', 'Out of', 'Perfect', 'Time'],
     (d.mathLog || []).slice().reverse().map(function (m) {
+      var signs = { mul: '×', div: '÷', add: '+', sub: '−' };
+      var mm = String(m.mode).match(/^(mul|div|add|sub)-(all|\d+)$/);
       var mode = m.mode === 'retake' ? 'Tricky ones 🔁'
+        : mm ? (mm[2] === 'all' ? signs[mm[1]] + ' mixed 🎲' : signs[mm[1]] + mm[2] + ' facts')
         : m.mode === 'facts' ? 'Math facts 🥕'
-        : (String(m.mode).indexOf('facts-') === 0 ? '×' + String(m.mode).slice(6) + ' facts'
-        : 'Mixed · ' + ({ pony: 'Pony 🐴', horse: 'Horse 🐎', unicorn: 'Unicorn 🦄' }[m.mode] || m.mode));
+        : (String(m.mode).indexOf('facts-') === 0 ? '×' + String(m.mode).slice(6) + ' facts' : String(m.mode));
       var t = Math.floor((m.seconds || 0) / 60) + 'm ' + ((m.seconds || 0) % 60) + 's';
       return [String(m.date).slice(0, 10) + ' ' + String(m.date).slice(11, 16), mode, m.score, m.total, m.score === m.total ? '⭐' : '', t];
     }));
