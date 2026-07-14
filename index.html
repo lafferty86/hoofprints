@@ -1557,22 +1557,27 @@ const SCENE_MANE={bay:'#4A2F17',chestnut:'#6E2F14',black:'#17171D',grey:'#6E7681
 function sceneHorse(h,x,y,sc){
   const coat=SCENE_COAT[h.coat]||SCENE_COAT.bay;
   const mane=SCENE_MANE[h.coat]||SCENE_MANE.bay;
-  const horn=h.size==='Unicorn'?`<path d="M52,-76 l3.5,-12 l3.5,12 z" fill="#F0C877" stroke="#D9A430" stroke-width=".8"/>`:'';
+  const horn=h.size==='Unicorn'?`<path d="M49,-101 L55,-116 L53,-99 Z" fill="#F0C877" stroke="#D9A430" stroke-width=".7"/>`:'';
   const name=esc(String(h.name).length>14?h.name.slice(0,13)+'…':h.name);
   return `<g class="scene-horse" data-scene-horse="${h.id}" transform="translate(${x},${y}) scale(${sc})" role="img" aria-label="${esc(h.name)}">
-    <path d="M-40,-40 C-52,-34 -55,-20 -47,-9" stroke="${mane}" stroke-width="7" fill="none" stroke-linecap="round"/>
-    <rect x="-33" y="-24" width="9" height="25" rx="4" fill="${coat}"/>
-    <rect x="-18" y="-24" width="9" height="25" rx="4" fill="${coat}"/>
-    <rect x="12" y="-24" width="9" height="25" rx="4" fill="${coat}"/>
-    <rect x="26" y="-24" width="9" height="25" rx="4" fill="${coat}"/>
-    <ellipse cx="0" cy="-38" rx="39" ry="21" fill="${coat}"/>
-    <path d="M22,-48 L38,-70 L50,-63 L36,-40 Z" fill="${coat}"/>
-    <ellipse cx="47" cy="-67" rx="14" ry="9.5" transform="rotate(22 47 -67)" fill="${coat}"/>
-    <path d="M41,-76 l3,-9 l6,6 z" fill="${coat}"/>
-    <path d="M37,-73 C31,-64 27,-54 25,-46" stroke="${mane}" stroke-width="6.5" fill="none" stroke-linecap="round"/>
+    <g>
+      <path d="M11,-40 L19,-40 L17,-7 L12,-7 Z" fill="${coat}"/><path d="M11,-40 L19,-40 L17,-7 L12,-7 Z" fill="#000" opacity=".18"/>
+      <path d="M-13,-40 L-23,-40 L-20,-7 L-14,-7 Z" fill="${coat}"/><path d="M-13,-40 L-23,-40 L-20,-7 L-14,-7 Z" fill="#000" opacity=".18"/>
+      <path d="M11.5,-8 L17.5,-8 L17.5,0 L11.5,0 Z" fill="#3B2E23" opacity=".82"/><path d="M-14.5,-8 L-20.5,-8 L-20.5,0 L-14.5,0 Z" fill="#3B2E23" opacity=".82"/>
+    </g>
+    <path d="M-38,-62 C-52,-56 -58,-34 -52,-10 C-49,-20 -53,-38 -43,-54 C-40,-58 -38,-60 -38,-62 Z" fill="${mane}"/>
+    <path d="M20,-42 L29,-42 L27,-7 L21,-7 Z" fill="${coat}"/>
+    <path d="M-26,-42 L-38,-42 L-34,-7 L-27,-7 Z" fill="${coat}"/>
+    <path d="M20.5,-8 L27.5,-8 L27.5,0 L20.5,0 Z" fill="#3B2E23"/>
+    <path d="M-27.5,-8 L-34.5,-8 L-34.5,0 L-27.5,0 Z" fill="#3B2E23"/>
+    <path d="M16,-70 C26,-78 36,-90 42,-97 C45,-100 50,-100 54,-97 C60,-93 66,-87 69,-82 C71,-79 71,-75 68,-74 C64,-72 60,-73 57,-75 C52,-78 49,-80 47,-82 C40,-72 32,-60 28,-52 C30,-44 29,-38 24,-36 C12,-33 -12,-33 -24,-36 C-33,-39 -39,-45 -41,-52 C-43,-58 -42,-64 -37,-67 C-20,-62 -2,-62 16,-70 Z" fill="${coat}"/>
+    <path d="M43,-99 C32,-90 22,-79 14,-70 C22,-73 32,-83 40,-93 C42,-96 43,-98 43,-99 Z" fill="${mane}"/>
+    <path d="M46,-100 C48,-96 50,-92 53,-89 C52,-95 50,-99 46,-100 Z" fill="${mane}"/>
+    <path d="M45,-99 L43,-109 L51,-103 Z" fill="${coat}"/>
     ${horn}
-    <circle cx="51" cy="-69" r="1.9" fill="#2B2118"/>
-    <text y="16" text-anchor="middle" font-size="13.5" font-weight="700" fill="var(--ink)" font-family="Nunito,sans-serif">${name}</text>
+    <circle cx="56" cy="-90" r="1.9" fill="#2B2118"/>
+    <circle cx="66" cy="-79" r="1.2" fill="#2B2118" opacity=".55"/>
+    <text y="16" text-anchor="middle" font-size="14" font-weight="700" fill="var(--ink)" font-family="Nunito,sans-serif">${name}</text>
   </g>`;
 }
 function renderScene(){
@@ -1587,7 +1592,7 @@ function renderScene(){
       const back=i%2===1&&hs.length>3;
       const y=back?196:224;
       const base=h.size==='Horse'?1:h.size==='Unicorn'?0.95:h.size==='Mini'?0.62:0.82;
-      horses+=sceneHorse(h,Math.round(x),y,(back?0.85:1)*base*0.92);
+      horses+=sceneHorse(h,Math.round(x),y,(back?0.85:1)*base*0.8);
     });
   }else{
     horses=`<g transform="translate(470,214)">
