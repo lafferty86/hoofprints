@@ -554,14 +554,14 @@ dialog::backdrop{background:rgba(60,35,20,.45);backdrop-filter:blur(3px)}
 /* ============ goals ============ */
 .goal-top{display:flex;align-items:center;gap:10px}
 .goal-emoji{font-size:2rem;line-height:1}
-.goal-top h3{font-size:1.2rem;font-weight:800}
+.goal-top h3{font-size:1.2rem;font-weight:800;overflow-wrap:anywhere}
 .bar{height:16px;background:var(--card-2);border:2px solid var(--line);border-radius:999px;overflow:hidden;margin:8px 0 4px}
 .bar>i{display:block;height:100%;background:linear-gradient(90deg,var(--rose),var(--gold));border-radius:999px;transition:width .4s ease}
 .goal-card.done-card{border-color:var(--green)}
 .goal-card.done-card .goal-emoji::after{content:" ✅"}
 
 /* ============ wishlist ============ */
-.wish-card h3{font-size:1.15rem;font-weight:800}
+.wish-card h3{font-size:1.15rem;font-weight:800;overflow-wrap:anywhere}
 .wish-why{margin:4px 0 0;font-size:.92rem;color:var(--ink-soft)}
 .wish-why::before{content:"because "}
 .wish-card.granted{border-color:var(--gold);background:linear-gradient(0deg,var(--gold-soft),var(--card))}
@@ -988,7 +988,7 @@ footer .data-btns{display:flex;gap:10px;justify-content:center;margin-bottom:10p
     <h2 id="goal-dlg-title">New goal! 🎯</h2>
     <div class="field">
       <label for="g-title">What do you want to do?</label>
-      <input type="text" id="g-title" required maxlength="60" placeholder="Canter without holding on, jump a crossrail…">
+      <textarea id="g-title" required maxlength="240" rows="2" placeholder="Canter without holding on, jump a crossrail, ride in my first show…"></textarea>
     </div>
     <div class="field">
       <label>Pick a goal emoji</label>
@@ -1015,7 +1015,7 @@ footer .data-btns{display:flex;gap:10px;justify-content:center;margin-bottom:10p
     <h2>Make a wish 🌠</h2>
     <div class="field">
       <label for="w-text">What are you wishing for?</label>
-      <input type="text" id="w-text" required maxlength="60" placeholder="A palomino pony, sparkly stirrups, a beach ride…">
+      <textarea id="w-text" required maxlength="240" rows="2" placeholder="A palomino pony, sparkly stirrups, a whole week of pony camp, a beach ride at sunset…"></textarea>
     </div>
     <div class="field">
       <label>What kind of wish?</label>
