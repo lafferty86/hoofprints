@@ -7,6 +7,7 @@ Hoofprints is a single-file web app: everything lives in `index.html`. It works 
 ## Features
 
 - **My Stable** — profile cards for every horse she's ridden: photo, breed, size (pony/horse/mini/🦄 unicorn), coat color, personality chips, favorite treat, and notes
+- **The paddock** — an illustrated barn scene at the top of the stable where every horse appears as a little figure matching its coat, size, and unicorn-ness, with its name; tap one to open its page
 - **Horse pages** — tap any horse for its own full page: hero profile, "friends since" counter, per-horse stats, activity chart, care history, best moments, ride timeline, and a photo wall
 - **Ride Journal** — log every ride: activity, minutes, mood (😴 → 🦄 MAGICAL), weather, the best moment, and a photo from the day
 - **Calendar** — month view of all rides, plus a planner for what's coming up (lessons, shows, farrier visits, pony camp) with countdown chips and repeating events — weekly, every 2 weeks, or monthly, with an optional end date

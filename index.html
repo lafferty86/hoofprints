@@ -329,6 +329,12 @@ nav.tabs{display:flex;flex-direction:column;gap:7px;position:sticky;top:14px}
   .tab:hover{transform:translateY(-2px)}
 }
 
+/* ============ stable scene ============ */
+.stable-scene{margin-bottom:16px}
+.stable-scene svg{display:block;width:100%;height:auto;border-radius:20px;border:2px solid var(--line);box-shadow:var(--shadow)}
+.scene-horse{cursor:pointer}
+.scene-horse:hover{filter:brightness(1.08)}
+
 /* ============ cards & grids ============ */
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:14px}
 .card{
@@ -695,6 +701,7 @@ footer .data-btns{display:flex;gap:10px;justify-content:center;margin-bottom:10p
 
   <!-- STABLE -->
   <section id="panel-stable" role="tabpanel">
+    <div class="stable-scene" id="stable-scene" aria-hidden="false"></div>
     <div class="section-head">
       <h2>My Stable</h2>
       <button class="cta" id="btn-add-horse">+ Add a horse</button>
@@ -1545,7 +1552,83 @@ function renderWishes(){
   }));
 }
 
+const SCENE_COAT={bay:'#8B5A33',chestnut:'#B4552D',black:'#3B3B45',grey:'#9DA6B0',palomino:'#E3B04B',roan:'#B48A93',cream:'#EFE3C1',pinto:'url(#coatPinto)',appy:'url(#coatAppy)',rainbow:'url(#coatRainbow)'};
+const SCENE_MANE={bay:'#4A2F17',chestnut:'#6E2F14',black:'#17171D',grey:'#6E7681',palomino:'#F7F0DC',roan:'#6E4A53',cream:'#D9C89B',pinto:'#4A2F17',appy:'#4A3626',rainbow:'#8A63C8'};
+function sceneHorse(h,x,y,sc){
+  const coat=SCENE_COAT[h.coat]||SCENE_COAT.bay;
+  const mane=SCENE_MANE[h.coat]||SCENE_MANE.bay;
+  const horn=h.size==='Unicorn'?`<path d="M52,-76 l3.5,-12 l3.5,12 z" fill="#F0C877" stroke="#D9A430" stroke-width=".8"/>`:'';
+  const name=esc(String(h.name).length>14?h.name.slice(0,13)+'…':h.name);
+  return `<g class="scene-horse" data-scene-horse="${h.id}" transform="translate(${x},${y}) scale(${sc})" role="img" aria-label="${esc(h.name)}">
+    <path d="M-40,-40 C-52,-34 -55,-20 -47,-9" stroke="${mane}" stroke-width="7" fill="none" stroke-linecap="round"/>
+    <rect x="-33" y="-24" width="9" height="25" rx="4" fill="${coat}"/>
+    <rect x="-18" y="-24" width="9" height="25" rx="4" fill="${coat}"/>
+    <rect x="12" y="-24" width="9" height="25" rx="4" fill="${coat}"/>
+    <rect x="26" y="-24" width="9" height="25" rx="4" fill="${coat}"/>
+    <ellipse cx="0" cy="-38" rx="39" ry="21" fill="${coat}"/>
+    <path d="M22,-48 L38,-70 L50,-63 L36,-40 Z" fill="${coat}"/>
+    <ellipse cx="47" cy="-67" rx="14" ry="9.5" transform="rotate(22 47 -67)" fill="${coat}"/>
+    <path d="M41,-76 l3,-9 l6,6 z" fill="${coat}"/>
+    <path d="M37,-73 C31,-64 27,-54 25,-46" stroke="${mane}" stroke-width="6.5" fill="none" stroke-linecap="round"/>
+    ${horn}
+    <circle cx="51" cy="-69" r="1.9" fill="#2B2118"/>
+    <text y="16" text-anchor="middle" font-size="13.5" font-weight="700" fill="var(--ink)" font-family="Nunito,sans-serif">${name}</text>
+  </g>`;
+}
+function renderScene(){
+  const el=$('#stable-scene');
+  const hs=state.horses.slice(0,12);
+  const extra=state.horses.length-hs.length;
+  let horses='';
+  if(hs.length){
+    const x0=200,x1=770;
+    hs.forEach((h,i)=>{
+      const x=hs.length===1?480:x0+(x1-x0)*i/(hs.length-1);
+      const back=i%2===1&&hs.length>3;
+      const y=back?196:224;
+      const base=h.size==='Horse'?1:h.size==='Unicorn'?0.95:h.size==='Mini'?0.62:0.82;
+      horses+=sceneHorse(h,Math.round(x),y,(back?0.85:1)*base*0.92);
+    });
+  }else{
+    horses=`<g transform="translate(470,214)">
+      <rect x="-4" y="-8" width="8" height="30" rx="3" fill="#B98A57"/>
+      <rect x="-118" y="-40" width="228" height="34" rx="10" fill="var(--card)" stroke="var(--line)" stroke-width="2"/>
+      <text y="-17" text-anchor="middle" font-size="15" font-weight="700" fill="var(--ink)" font-family="Nunito,sans-serif">Room for your first horse! 🐴</text>
+    </g>`;
+  }
+  const more=extra>0?`<g transform="translate(760,80)"><rect x="-46" y="-16" width="92" height="26" rx="13" fill="var(--card)" stroke="var(--line)" stroke-width="2"/><text y="2" text-anchor="middle" font-size="13" font-weight="700" fill="var(--ink-soft)" font-family="Nunito,sans-serif">+${extra} more</text></g>`:'';
+  el.innerHTML=`<svg viewBox="0 0 820 252" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <linearGradient id="coatRainbow" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#F79BB7"/><stop offset=".25" stop-color="#F3B857"/><stop offset=".5" stop-color="#6FBE8A"/><stop offset=".75" stop-color="#7FB9DF"/><stop offset="1" stop-color="#B79BE8"/></linearGradient>
+      <pattern id="coatPinto" patternUnits="userSpaceOnUse" width="34" height="26"><rect width="34" height="26" fill="#8B5A33"/><ellipse cx="8" cy="7" rx="9" ry="6" fill="#F4EDE1"/><ellipse cx="26" cy="19" rx="10" ry="7" fill="#F4EDE1"/></pattern>
+      <pattern id="coatAppy" patternUnits="userSpaceOnUse" width="22" height="18"><rect width="22" height="18" fill="#7A5236"/><circle cx="5" cy="5" r="2.4" fill="#F4EDE1"/><circle cx="15" cy="12" r="2" fill="#F4EDE1"/></pattern>
+    </defs>
+    <rect width="820" height="252" fill="var(--sky-soft)"/>
+    <circle cx="745" cy="42" r="24" fill="var(--gold)" opacity=".9"/>
+    <ellipse cx="580" cy="52" rx="42" ry="14" fill="var(--card)" opacity=".85"/>
+    <ellipse cx="620" cy="44" rx="30" ry="11" fill="var(--card)" opacity=".85"/>
+    <ellipse cx="300" cy="38" rx="36" ry="12" fill="var(--card)" opacity=".8"/>
+    <rect y="172" width="820" height="80" fill="var(--green-soft)"/>
+    <g>
+      ${[180,300,420,540,660,780].map(x=>`<rect x="${x}" y="128" width="7" height="48" rx="3" fill="#B98A57"/>`).join('')}
+      <rect x="150" y="136" width="670" height="7" rx="3.5" fill="#C9A06C"/>
+      <rect x="150" y="156" width="670" height="7" rx="3.5" fill="#C9A06C"/>
+    </g>
+    <g transform="translate(84,176)">
+      <polygon points="-72,-64 0,-116 72,-64" fill="#A03D2E"/>
+      <rect x="-62" y="-64" width="124" height="64" fill="#C25848"/>
+      <rect x="-20" y="-42" width="40" height="42" rx="5" fill="#7A3226"/>
+      <path d="M-20,-42 L20,0 M20,-42 L-20,0" stroke="#E8CDB1" stroke-width="3.5"/>
+      <rect x="-12" y="-104" width="24" height="18" rx="4" fill="#FFF4E0"/>
+      <path d="M-12,-95 h24 M0,-104 v18" stroke="#A03D2E" stroke-width="2"/>
+    </g>
+    ${horses}
+    ${more}
+  </svg>`;
+  el.querySelectorAll('[data-scene-horse]').forEach(g=>g.addEventListener('click',()=>openHorsePage(g.dataset.sceneHorse)));
+}
 function renderStable(){
+  renderScene();
   const g=$('#stable-grid');
   if(!state.horses.length){
     g.innerHTML=`<div class="empty" style="grid-column:1/-1">
