@@ -454,9 +454,10 @@ nav.tabs{display:flex;flex-direction:column;gap:7px;position:sticky;top:14px}
 .mem-card.matched{background:var(--green-soft);border-color:var(--green);transform:scale(.94);cursor:default}
 .mem-card.open{background:var(--card-2)}
 #jump-canvas{width:100%;height:auto;display:block;background:var(--sky-soft);border:2px solid var(--line);border-radius:14px;touch-action:manipulation;cursor:pointer}
-.math-toggle{display:flex;border:2px solid var(--line);border-radius:999px;overflow:hidden;margin:12px 0 10px}
-.math-toggle button{flex:1;border:none;background:var(--card-2);color:var(--ink-soft);font-weight:800;font-size:.85rem;padding:10px 2px;white-space:nowrap;cursor:pointer}
-.math-toggle button.active{background:var(--rose);color:#fff}
+.math-ops{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:6px 0 12px}
+.math-op{display:flex;flex-direction:column;align-items:center;gap:4px;border:2px solid var(--line);background:var(--card-2);color:var(--ink);border-radius:14px;padding:16px 8px;font-weight:800;font-size:1rem;cursor:pointer}
+.math-op:hover{border-color:var(--rose);background:var(--rose-soft)}
+.math-op .op-sym{font-family:var(--font-display);font-size:2rem;line-height:1;color:var(--rose)}
 .math-tables{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
 .math-tables button{border:2px solid var(--line);background:var(--card-2);color:var(--ink);border-radius:10px;padding:9px 0;font-weight:800;font-size:.92rem;cursor:pointer}
 .math-tables button:hover{border-color:var(--rose)}
@@ -546,8 +547,10 @@ dialog{
   background:var(--card);color:var(--ink);box-shadow:var(--shadow-lift);
 }
 dialog::backdrop{background:rgba(60,35,20,.45);backdrop-filter:blur(3px)}
-.dlg-inner{padding:22px}
+.dlg-inner{padding:22px;position:relative}
 .dlg-inner h2{font-size:1.5rem;font-weight:800;margin-bottom:14px}
+.dlg-x{position:absolute;top:12px;right:12px;border:none;background:var(--card-2);color:var(--ink-soft);width:36px;height:36px;border-radius:999px;font-size:1rem;font-weight:800;line-height:1;cursor:pointer;z-index:2}
+.dlg-x:hover{background:var(--rose-soft);color:var(--rose-deep)}
 .field{margin-bottom:14px}
 .field>label{display:block;font-weight:800;font-size:.85rem;text-transform:uppercase;letter-spacing:.07em;color:var(--ink-soft);margin-bottom:5px}
 .field input[type=text],.field input[type=date],.field input[type=number],.field input[type=password],.field input[type=time],.field select,.field textarea{
@@ -1098,6 +1101,7 @@ footer .data-btns{display:flex;gap:10px;justify-content:center;margin-bottom:10p
 <!-- MATH DIALOG -->
 <dialog id="dlg-math">
   <div class="dlg-inner">
+    <button class="dlg-x" type="button" id="math-x" aria-label="Close the game" data-close>✕</button>
     <h2>Math Trot 🥕</h2>
     <div id="math-body"></div>
   </div>
@@ -2341,40 +2345,53 @@ const mathWhen=ts=>{const d=new Date(ts);return `${d.toLocaleDateString(undefine
 
 function startMath(){
   math=null;
-  renderMathSetup();
+  renderMathOps();
   $('#dlg-math').showModal();
 }
-function renderMathSetup(){
-  const s=mathSetup,tip=mathSuggest();
+/* Step 1: pick the operation (× ÷ + −). */
+function renderMathOps(){
+  math=null;
+  const tip=mathSuggest();
   const recent=state.math.sessions.slice(-3).reverse();
   const carrots=Object.values(state.math.facts).reduce((a,f)=>a+(f.r||0),0);
   $('#math-body').innerHTML=`
-    <p class="horse-meta">Pick your practice, then trot through 12 cards. Miss one? It comes back for a retake lap until you've rounded them all up! 🤠</p>
+    <p class="horse-meta">What do you want to practice today? Pick a math gait! 🐴</p>
     ${carrots?`<p class="chips"><span class="chip green">🥕 ${carrots} carrot${carrots===1?'':'s'} munched</span><span class="chip gold">🏇 ${state.math.sessions.length} round${state.math.sessions.length===1?'':'s'} ridden</span></p>`:''}
-    <div class="math-toggle" role="group" aria-label="fact type">
-      ${MATH_MODES.map(x=>`<button type="button" data-mode="${x.id}" class="${s.mode===x.id?'active':''}">${x.sym} ${x.name}</button>`).join('')}
+    <div class="math-ops">
+      ${MATH_MODES.map(x=>`<button class="math-op" type="button" data-mode="${x.id}"><span class="op-sym">${x.sym}</span><span>${x.name}</span></button>`).join('')}
     </div>
-    <div class="math-tables">
-      <button type="button" data-table="0" class="${!s.table?'active':''}">Mix 🌾</button>
-      ${MATH_TABLES.map(t=>`<button type="button" data-table="${t}" class="${s.table===t?'active':''}">${t}s</button>`).join('')}
-    </div>
-    <button type="button" class="coach-tip" id="math-take-tip" title="Tap to take Coach's pick">🐴 <span><b>Coach Clover says:</b> ${tip.text}</span></button>
+    <button type="button" class="coach-tip" id="math-take-tip" title="Tap to start Coach's pick">🐴 <span><b>Coach Clover says:</b> ${tip.text}</span></button>
     ${recent.length?`<p class="quiz-progress" style="margin-top:14px">Your last rounds</p>
       <div class="math-history">${recent.map(x=>`<div class="math-hist-row"><span>${mathModeTxt(x.mode)} ${x.table?x.table+'s':'Mix'}</span><b>${x.firstTry}/${x.total} first try${x.laps>1?` · ${x.laps-1} retake${x.laps===2?'':'s'}`:''}</b><span>${mathWhen(x.ts)}</span></div>`).join('')}</div>`:''}
     <div class="dlg-actions">
       <button class="ghost-btn" type="button" data-close>Not now</button>
-      <button class="cta" id="math-start" type="button">Saddle up! 🏇</button>
     </div>`;
-  $('#math-body').querySelectorAll('[data-mode]').forEach(b=>b.addEventListener('click',()=>{mathSetup.mode=b.dataset.mode;renderMathSetup()}));
-  $('#math-body').querySelectorAll('[data-table]').forEach(b=>b.addEventListener('click',()=>{mathSetup.table=+b.dataset.table;renderMathSetup()}));
-  $('#math-take-tip').addEventListener('click',()=>{mathSetup={mode:tip.mode,table:tip.table};renderMathSetup()});
+  $('#math-body').querySelectorAll('[data-mode]').forEach(b=>b.addEventListener('click',()=>renderMathFacts(b.dataset.mode)));
+  $('#math-take-tip').addEventListener('click',()=>beginMathRound(tip.mode,tip.table));
   $('#math-body').querySelector('[data-close]').addEventListener('click',()=>$('#dlg-math').close());
-  $('#math-start').addEventListener('click',beginMathRound);
+}
+/* Step 2: pick which fact family to drill, or a random mix. */
+function renderMathFacts(mode){
+  const mm=MATH_MODES.find(x=>x.id===mode);
+  $('#math-body').innerHTML=`
+    <p class="quiz-progress">${mm.sym} ${mm.name} — now pick a fact family, or a random mix</p>
+    <div class="math-tables">
+      <button type="button" data-table="0">Mix 🌾</button>
+      ${MATH_TABLES.map(t=>`<button type="button" data-table="${t}">${mm.sym}${t}</button>`).join('')}
+    </div>
+    <div class="dlg-actions" style="justify-content:space-between">
+      <button class="ghost-btn" type="button" id="math-back">← Back</button>
+      <button class="ghost-btn" type="button" data-close>Not now</button>
+    </div>`;
+  $('#math-body').querySelectorAll('[data-table]').forEach(b=>b.addEventListener('click',()=>beginMathRound(mode,+b.dataset.table)));
+  $('#math-back').addEventListener('click',renderMathOps);
+  $('#math-body').querySelector('[data-close]').addEventListener('click',()=>$('#dlg-math').close());
 }
 
-function beginMathRound(){
-  const deck=mathDeck(mathSetup.mode,mathSetup.table);
-  math={mode:mathSetup.mode,table:mathSetup.table,deck,idx:0,lap:1,missed:[],firstTry:0,total:deck.length,startTs:Date.now(),lock:false};
+function beginMathRound(mode,table){
+  mathSetup={mode,table};
+  const deck=mathDeck(mode,table);
+  math={mode,table,deck,idx:0,lap:1,missed:[],firstTry:0,total:deck.length,startTs:Date.now(),lock:false};
   renderMathCard();
 }
 function mathTrailHTML(){
@@ -2484,11 +2501,13 @@ function endMathRound(){
       <button class="cta" id="math-again" type="button">Ride again! 🔄</button>
     </div></div>`;
   $('#math-body').querySelector('[data-close]').addEventListener('click',()=>$('#dlg-math').close());
-  $('#math-again').addEventListener('click',renderMathSetup);
+  $('#math-again').addEventListener('click',renderMathOps);
   confetti(perfect?140:80);
   persist();render();checkNewBadges();
 }
 $('#btn-math').addEventListener('click',startMath);
+// closing the game (✕, Escape, or a button) cancels any round in progress so no stray timer fires
+$('#dlg-math').addEventListener('close',()=>{math=null});
 
 /* ================= horse profile page ================= */
 let currentHorsePage=null;
