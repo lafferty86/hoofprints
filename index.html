@@ -471,10 +471,8 @@ button.coach-tip:hover{box-shadow:0 0 0 2px var(--gold)}
 .math-trail .barn{font-size:1.15rem;margin-left:2px}
 .math-q{font-family:var(--font-display);font-weight:800;font-size:2rem;text-align:center;margin:6px 0 14px}
 .math-blank{color:var(--rose)}
-.math-answer-row{display:flex;gap:10px;justify-content:center}
-#math-answer{width:130px;text-align:center;font-size:1.5rem;font-weight:800;font-family:var(--font-display);border:2px solid var(--line);border-radius:14px;background:var(--card-2);color:var(--ink);padding:8px;appearance:textfield;-moz-appearance:textfield}
-#math-answer::-webkit-outer-spin-button,#math-answer::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
-#math-answer:focus{outline:none;border-color:var(--rose)}
+.math-opts{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:4px 0 0}
+.math-opts .quiz-opt{text-align:center;font-family:var(--font-display);font-weight:800;font-size:1.5rem}
 .math-history{display:flex;flex-direction:column;gap:6px}
 .math-hist-row{display:flex;justify-content:space-between;align-items:center;gap:8px;background:var(--card-2);border-radius:10px;padding:7px 10px;font-size:.82rem;font-weight:700;color:var(--ink-soft)}
 .math-hist-row b{color:var(--ink)}
@@ -2375,25 +2373,32 @@ function mathTrailHTML(){
   }
   return out+'<span class="barn">🏡</span></div>';
 }
+/* four tap-able answer choices: the right one plus three near-miss distractors,
+   shuffled so nothing is highlighted until she picks. */
+function mathOptions(ans){
+  const ri=n=>1+Math.floor(Math.random()*n);
+  const opts=new Set([ans]);
+  let guard=0;
+  while(opts.size<4&&guard++<80){
+    const d=ans+(Math.random()<.5?-1:1)*ri(Math.max(3,Math.round(ans*.25)+1));
+    if(d>=0&&d!==ans)opts.add(d);
+  }
+  while(opts.size<4)opts.add(ans+opts.size);
+  return shuffle([...opts]);
+}
 function renderMathCard(){
   const m=math,card=m.deck[m.idx];
   m.lock=false;
+  const opts=mathOptions(card.ans);
   $('#math-body').innerHTML=`
     <p class="quiz-progress">${m.lap>1?`Retake lap ${m.lap-1} · `:''}Card ${m.idx+1} of ${m.deck.length}</p>
     ${mathTrailHTML()}
     <p class="math-q">${card.q} = <span class="math-blank">?</span></p>
-    <div class="math-answer-row">
-      <input id="math-answer" type="number" inputmode="numeric" autocomplete="off" aria-label="your answer" placeholder="?">
-      <button class="cta" id="math-go" type="button">Go! 🥕</button>
-    </div>
+    <div class="math-opts">${opts.map(o=>`<button class="quiz-opt" type="button" data-val="${o}">${o}</button>`).join('')}</div>
     <div id="math-after"></div>`;
-  const inp=$('#math-answer');
-  inp.focus();
-  const submit=()=>{const v=parseInt(inp.value,10);if(!isNaN(v))mathAnswer(v)};
-  $('#math-go').addEventListener('click',submit);
-  inp.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();submit()}});
+  $('#math-body').querySelectorAll('[data-val]').forEach(btn=>btn.addEventListener('click',()=>mathAnswer(parseInt(btn.dataset.val,10),btn)));
 }
-function mathAnswer(val){
+function mathAnswer(val,btn){
   const m=math,card=m.deck[m.idx];
   if(m.lock)return;m.lock=true;
   const ok=val===card.ans;
@@ -2403,15 +2408,20 @@ function mathAnswer(val){
   f.last=Date.now();
   if(ok&&m.lap===1)m.firstTry++;
   if(!ok)m.missed.push(card);
-  $('#math-answer').disabled=true;$('#math-go').disabled=true;
+  // lock every choice, light up the correct one green and a wrong pick red
+  $('#math-body').querySelectorAll('[data-val]').forEach(x=>{
+    x.disabled=true;
+    if(parseInt(x.dataset.val,10)===card.ans)x.classList.add('right');
+    else if(x===btn)x.classList.add('wrong');
+  });
   if(ok){
     $('#math-after').innerHTML=`<p class="quiz-explain">🎉 Yes! <b>${card.q} = ${card.ans}</b> — crunch, crunch! 🥕</p>`;
     confetti(15);
-    setTimeout(()=>{if(math===m)mathNext()},850);
+    setTimeout(()=>{if(math===m)mathNext()},900);
   }else{
-    $('#math-after').innerHTML=`<p class="quiz-explain">🙊 Not quite — <b>${card.q} = ${card.ans}</b>. That card trots back for the retake lap!</p>
-      <div class="dlg-actions"><button class="cta" id="math-next" type="button">Keep trotting →</button></div>`;
-    $('#math-next').addEventListener('click',mathNext);
+    // hold on the correct answer for a beat so she can take it in, then trot on
+    $('#math-after').innerHTML=`<p class="quiz-explain">🙊 Not quite — <b>${card.q} = ${card.ans}</b>. That card trots back for the retake lap!</p>`;
+    setTimeout(()=>{if(math===m)mathNext()},2000);
   }
 }
 function mathNext(){
