@@ -453,11 +453,29 @@ nav.tabs{display:flex;flex-direction:column;gap:7px;position:sticky;top:14px}
 .mem-card:hover{transform:scale(1.04)}
 .mem-card.matched{background:var(--green-soft);border-color:var(--green);transform:scale(.94);cursor:default}
 .mem-card.open{background:var(--card-2)}
-.math-q{font-size:2.1rem;font-family:var(--font-display);font-weight:800;text-align:center;margin:6px 0 16px}
-.math-opts{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-.math-opts .quiz-opt{text-align:center;font-size:1.25rem;font-family:var(--font-display);font-weight:800}
-.carrots{text-align:center;font-size:1.05rem;letter-spacing:2px;min-height:1.4em;margin:10px 0 0}
 #jump-canvas{width:100%;height:auto;display:block;background:var(--sky-soft);border:2px solid var(--line);border-radius:14px;touch-action:manipulation;cursor:pointer}
+.math-toggle{display:flex;border:2px solid var(--line);border-radius:999px;overflow:hidden;margin:12px 0 10px}
+.math-toggle button{flex:1;border:none;background:var(--card-2);color:var(--ink-soft);font-weight:800;font-size:.85rem;padding:10px 2px;white-space:nowrap;cursor:pointer}
+.math-toggle button.active{background:var(--rose);color:#fff}
+.math-tables{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+.math-tables button{border:2px solid var(--line);background:var(--card-2);color:var(--ink);border-radius:10px;padding:9px 0;font-weight:800;font-size:.92rem;cursor:pointer}
+.math-tables button:hover{border-color:var(--rose)}
+.math-tables button.active{border-color:var(--rose);background:var(--rose-soft);color:var(--rose-deep)}
+.coach-tip{display:flex;align-items:flex-start;gap:8px;width:100%;text-align:left;border:none;background:var(--gold-soft);border-radius:12px;padding:10px 12px;font-size:.88rem;font-weight:700;color:var(--ink);margin:12px 0 0}
+button.coach-tip{cursor:pointer}
+button.coach-tip:hover{box-shadow:0 0 0 2px var(--gold)}
+.math-trail{display:flex;align-items:center;background:var(--green-soft);border-radius:999px;padding:5px 10px;margin:0 0 12px;min-height:34px}
+.math-trail i{flex:1;text-align:center;font-style:normal;font-size:.95rem;color:var(--ink-soft);opacity:.55;line-height:1}
+.math-trail i.done{opacity:1}
+.math-trail i.pony{font-size:1.35rem;opacity:1;transform:scaleX(-1)}
+.math-trail .barn{font-size:1.15rem;margin-left:2px}
+.math-q{font-family:var(--font-display);font-weight:800;font-size:2rem;text-align:center;margin:6px 0 14px}
+.math-blank{color:var(--rose)}
+.math-opts{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:4px 0 0}
+.math-opts .quiz-opt{text-align:center;font-family:var(--font-display);font-weight:800;font-size:1.5rem}
+.math-history{display:flex;flex-direction:column;gap:6px}
+.math-hist-row{display:flex;justify-content:space-between;align-items:center;gap:8px;background:var(--card-2);border-radius:10px;padding:7px 10px;font-size:.82rem;font-weight:700;color:var(--ink-soft)}
+.math-hist-row b{color:var(--ink)}
 
 /* ============ stats ============ */
 .stat-card h3{font-size:1.15rem;font-weight:800;margin-bottom:10px}
@@ -836,10 +854,11 @@ footer .data-btns{display:flex;gap:10px;justify-content:center;margin-bottom:10p
         <button class="cta green" id="btn-jump">Play! 🐎</button>
       </div>
       <div class="card fun-card">
-        <h3>🥕 Carrot Count</h3>
-        <p class="horse-meta">Pick ×, ÷, + or − and the fact to drill — 20 questions a round!</p>
-        <p class="chips"><span class="chip green" id="math-best-chip">Best: —</span></p>
-        <button class="cta" id="btn-math">Play! 🧮</button>
+        <h3>🥕 Math Trot</h3>
+        <p class="horse-meta">Trot your pony home by solving ×, ÷, + and − facts. Missed cards come back for a retake lap!</p>
+        <p class="chips"><span class="chip green" id="math-chip">Rounds: —</span></p>
+        <p class="horse-meta" id="math-coach-card"></p>
+        <button class="cta" id="btn-math">Practice! 🐴</button>
       </div>
       <div class="card fun-card">
         <h3>🎠 Send the pony!</h3>
@@ -1065,14 +1084,6 @@ footer .data-btns{display:flex;gap:10px;justify-content:center;margin-bottom:10p
   </div>
 </dialog>
 
-<!-- MATH DIALOG -->
-<dialog id="dlg-math">
-  <div class="dlg-inner">
-    <h2>Carrot Count 🥕</h2>
-    <div id="math-body"></div>
-  </div>
-</dialog>
-
 <!-- JUMP DIALOG -->
 <dialog id="dlg-jump">
   <div class="dlg-inner">
@@ -1081,6 +1092,14 @@ footer .data-btns{display:flex;gap:10px;justify-content:center;margin-bottom:10p
     <canvas id="jump-canvas" width="640" height="220"></canvas>
     <p class="horse-meta" style="margin-top:8px">Fences cleared: <b id="jump-score">0</b> · Best: <b id="jump-best-live">0</b></p>
     <div class="dlg-actions"><button class="ghost-btn" data-close>Done</button></div>
+  </div>
+</dialog>
+
+<!-- MATH DIALOG -->
+<dialog id="dlg-math">
+  <div class="dlg-inner">
+    <h2>Math Trot 🥕</h2>
+    <div id="math-body"></div>
   </div>
 </dialog>
 
@@ -1305,8 +1324,10 @@ const BADGES=[
   {id:'photo',   emoji:'📸', name:'Say Neigh-se!',     desc:'Add a photo to a horse or a ride',     test:s=>s.horses.some(h=>h.photo)||s.rides.some(r=>r.photo)},
   {id:'quiz',    emoji:'🧠', name:'Quiz Whiz',         desc:'Score a perfect 5/5 in the Pony Quiz',  test:s=>(s.games||{}).perfectQuiz>=1},
   {id:'pairs',   emoji:'👀', name:'Sharp Eyes',        desc:'Win Stable Pairs in 12 flips or fewer', test:s=>{const b=(s.games||{}).bestMemory;return b>0&&b<=12}},
-  {id:'math',    emoji:'🥕', name:'Carrot Counter',    desc:'Get a perfect round in Carrot Count',   test:s=>(s.games||{}).perfectMath>=1},
   {id:'flyer',   emoji:'🏇', name:'High Flyer',        desc:'Clear 10 fences in one Gallop! run',    test:s=>(s.games||{}).bestJump>=10},
+  {id:'math1',   emoji:'🥕', name:'Carrot Counter',    desc:'Finish your first Math Trot round',     test:s=>((s.math||{}).sessions||[]).length>=1||(s.games||{}).perfectMath>=1},
+  {id:'math10',  emoji:'🧮', name:'Math Mustang',      desc:'Finish 10 Math Trot rounds',            test:s=>((s.math||{}).sessions||[]).length>=10},
+  {id:'mathace', emoji:'🎓', name:'One-Lap Wonder',    desc:'Get every math card right on the first try', test:s=>((s.math||{}).sessions||[]).some(x=>x.total>0&&x.firstTry>=x.total)},
   {id:'streak3', emoji:'🔥', name:'Hot Streak',        desc:'Ride 3 weeks in a row',                 test:s=>streaks(s).best>=3},
   {id:'streak8', emoji:'🌋', name:'Unstoppable',       desc:'Ride 8 weeks in a row',                 test:s=>streaks(s).best>=8},
   {id:'care5',   emoji:'💕', name:'Best Friend',       desc:'Log 5 care days for your horses',       test:s=>s.horses.reduce((a,h)=>a+(h.care||[]).length,0)>=5},
@@ -1329,6 +1350,8 @@ function normalize(s){
   s.theme=THEMES.some(t=>t.id===s.theme)?s.theme:'party';
   s.games=Object.assign({quizBest:0,perfectQuiz:0,bestMemory:0,bestJump:0,mathBest:0,perfectMath:0,mathBestPct:0},(s.games&&typeof s.games==='object')?s.games:{});
   if(!s.games.mathBestPct&&s.games.mathBest)s.games.mathBestPct=Math.min(100,s.games.mathBest*10);
+  const mm=(s.math&&typeof s.math==='object')?s.math:{};
+  s.math={sessions:Array.isArray(mm.sessions)?mm.sessions:[],facts:(mm.facts&&typeof mm.facts==='object'&&!Array.isArray(mm.facts))?mm.facts:{}};
   s.updatedAt=typeof s.updatedAt==='number'?s.updatedAt:0;
   s.mathLog=Array.isArray(s.mathLog)?s.mathLog.slice(-300):[];
   s.events=Array.isArray(s.events)?s.events:[];
@@ -1431,8 +1454,10 @@ function render(){
   if(currentHorsePage)renderHorsePage();
   $('#quiz-best-chip').textContent=state.games.quizBest?`Best: ${state.games.quizBest}/5`:'Best: —';
   $('#mem-best-chip').textContent=state.games.bestMemory?`Best: ${state.games.bestMemory} flips`:'Best: —';
-  $('#math-best-chip').textContent=state.games.mathBestPct?`Best: ${state.games.mathBestPct}%`:'Best: —';
   $('#jump-best-chip').textContent=`Best: ${state.games.bestJump} fence${state.games.bestJump===1?'':'s'}`;
+  const msess=state.math.sessions;
+  $('#math-chip').textContent=msess.length?`Rounds: ${msess.length} · Best: ${Math.max(...msess.map(x=>x.firstTry))}/12 first try`:'Rounds: —';
+  $('#math-coach-card').textContent=`🐴 Coach says: ${mathSuggest().text}`;
 }
 
 function renderGoals(){
@@ -2173,146 +2198,6 @@ function flipMem(i){
 $('#btn-mem').addEventListener('click',()=>{startMem();$('#dlg-mem').showModal()});
 $('#mem-restart').addEventListener('click',startMem);
 
-/* ================= games: carrot count ================= */
-const MATH_OPS=[
-  {id:'mul',sign:'×',emoji:'✖️',name:'Multiplication'},
-  {id:'div',sign:'÷',emoji:'➗',name:'Division'},
-  {id:'add',sign:'+',emoji:'➕',name:'Addition'},
-  {id:'sub',sign:'−',emoji:'➖',name:'Subtraction'}
-];
-let mathRound=null;
-function makeOpts(ans){
-  const ri=n=>1+Math.floor(Math.random()*n);
-  const opts=new Set([ans]);
-  let guard=0;
-  while(opts.size<4&&guard++<80){
-    const d=ans+(Math.random()<.5?-1:1)*ri(Math.max(3,Math.round(ans*.25)+1));
-    if(d>=0&&d!==ans)opts.add(d);
-  }
-  while(opts.size<4)opts.add(ans+opts.size);
-  return shuffle([...opts]);
-}
-function factQuestion(op,n,k){
-  if(op==='mul')return{text:`${n} × ${k} = ?`,ans:n*k};
-  if(op==='div')return{text:`${n*k} ÷ ${n} = ?`,ans:k};
-  if(op==='add')return{text:`${n} + ${k} = ?`,ans:n+k};
-  return{text:`${n+k} − ${n} = ?`,ans:k};
-}
-function buildRound(op,fact){
-  const ri=n=>1+Math.floor(Math.random()*n);
-  const qs=[];
-  if(fact==='all'){
-    for(let i=0;i<20;i++)qs.push(factQuestion(op,ri(12),ri(12)));
-  }else{
-    const deck=[...shuffle([1,2,3,4,5,6,7,8,9,10,11,12]),...shuffle([1,2,3,4,5,6,7,8,9,10,11,12])].slice(0,20);
-    for(const k of deck)qs.push(factQuestion(op,fact,k));
-  }
-  return qs;
-}
-window._mathBuild=buildRound;
-function modeLabel(mode){
-  if(mode==='retake')return 'Tricky ones 🔁';
-  const m=String(mode).match(/^(mul|div|add|sub)-(all|\d+)$/);
-  if(m){
-    const op=MATH_OPS.find(o=>o.id===m[1]);
-    return m[2]==='all'?`${op.sign} mixed 🎲`:`${op.sign}${m[2]} facts`;
-  }
-  return 'Math facts 🥕';
-}
-function startMathRound(mode,qlist){
-  mathRound={mode,qlist,idx:0,score:0,wrongs:[],total:qlist.length,start:Date.now()};
-  renderMathQ();
-}
-function startMath(){
-  showOpScreen();
-  $('#dlg-math').showModal();
-}
-function showOpScreen(){
-  mathRound=null;
-  $('#math-body').innerHTML=`
-    <p class="horse-meta" style="text-align:center">What do you want to practice?</p>
-    <div class="quiz-opts" style="margin-top:12px">
-      ${MATH_OPS.map(o=>`<button class="quiz-opt" style="text-align:center;font-family:var(--font-display);font-weight:800;font-size:1.1rem" data-mop="${o.id}">${o.emoji} ${o.name}</button>`).join('')}
-    </div>`;
-  $('#math-body').querySelectorAll('[data-mop]').forEach(b=>b.addEventListener('click',()=>showFactScreen(b.dataset.mop)));
-}
-function showFactScreen(op){
-  const o=MATH_OPS.find(x=>x.id===op);
-  $('#math-body').innerHTML=`
-    <p class="quiz-progress">${o.emoji} ${o.name} — pick the fact to practice (20 questions)</p>
-    <div class="pick-row" style="margin-bottom:12px">
-      ${[1,2,3,4,5,6,7,8,9,10,11,12].map(n=>`<button class="mini-btn" data-mfact="${n}">${o.sign}${n}</button>`).join('')}
-    </div>
-    <div class="quiz-opts">
-      <button class="quiz-opt" style="text-align:center" data-mfact="all">🎲 All of them — random mix</button>
-      <button class="quiz-opt" style="text-align:center" id="math-back">← Pick a different sign</button>
-    </div>`;
-  $('#math-body').querySelectorAll('[data-mfact]').forEach(b=>b.addEventListener('click',()=>{
-    const f=b.dataset.mfact==='all'?'all':parseInt(b.dataset.mfact,10);
-    startMathRound(`${op}-${f}`,buildRound(op,f));
-  }));
-  $('#math-back').addEventListener('click',showOpScreen);
-}
-function renderMathQ(){
-  const r=mathRound;
-  const q=r.qlist?r.qlist[r.idx]:mathQuestion();
-  const opts=makeOpts(q.ans);
-  $('#math-body').innerHTML=`
-    <p class="quiz-progress">Question ${r.idx+1} of ${r.total} · ${modeLabel(r.mode)}</p>
-    <p class="math-q">${q.text}</p>
-    <div class="math-opts">${opts.map(o=>`<button class="quiz-opt" data-val="${o}">${o}</button>`).join('')}</div>
-    <p class="carrots">${'🥕'.repeat(r.score)}</p>`;
-  $('#math-body').querySelectorAll('[data-val]').forEach(b=>b.addEventListener('click',()=>{
-    const ok=parseInt(b.dataset.val,10)===q.ans;
-    if(ok)r.score++;
-    else if(!r.wrongs.some(w=>w.text===q.text))r.wrongs.push({text:q.text,ans:q.ans});
-    $('#math-body').querySelectorAll('[data-val]').forEach(x=>{
-      x.disabled=true;
-      if(parseInt(x.dataset.val,10)===q.ans)x.classList.add('right');
-      else if(x===b)x.classList.add('wrong');
-    });
-    $('#math-body').querySelector('.carrots').textContent='🥕'.repeat(r.score);
-    if(ok)confetti(10);
-    setTimeout(()=>{
-      r.idx++;
-      if(r.idx<r.total)renderMathQ();else endMath();
-    },ok?650:1400);
-  }));
-}
-function endMath(){
-  const r=mathRound;
-  const seconds=Math.max(1,Math.round((Date.now()-r.start)/1000));
-  const perfect=r.score===r.total;
-  const isRetake=r.mode==='retake';
-  let msg;
-  if(isRetake)msg=perfect?'You fixed them ALL! Nothing can stop you! 🌟':'Getting closer — the tricky ones are almost tamed!';
-  else msg=perfect?'PERFECT! The pony is stuffed with carrots! 🐴🥕':r.score>=r.total*.7?'Great counting! The pony is very happy 😊':'Good try! The pony still got some snacks 💗';
-  $('#math-body').innerHTML=`<div class="quiz-end">
-    <div class="big">${perfect?'🏆':r.score>=r.total*.7?'🥕':'🐴'}</div>
-    <h3>${r.score} out of ${r.total}!</h3>
-    <p class="horse-meta">${msg} · ⏱ ${Math.floor(seconds/60)?Math.floor(seconds/60)+'m ':''}${seconds%60}s</p>
-    <p class="carrots">${'🥕'.repeat(r.score)}</p>
-    <div class="dlg-actions" style="justify-content:center;flex-wrap:wrap">
-      <button class="ghost-btn" data-close>Done</button>
-      ${r.wrongs.length?`<button class="cta green" id="math-retake">🔁 Fix the tricky ones (${r.wrongs.length})</button>`:''}
-      <button class="cta" id="math-again">New round! 🔄</button>
-    </div>
-  </div>`;
-  $('#math-body').querySelector('[data-close]').addEventListener('click',()=>$('#dlg-math').close());
-  $('#math-again').addEventListener('click',startMath);
-  const rt=$('#math-retake');
-  if(rt)rt.addEventListener('click',()=>startMathRound('retake',shuffle(r.wrongs)));
-  if(!isRetake){
-    const pct=Math.round(r.score/r.total*100);
-    if(pct>state.games.mathBestPct)state.games.mathBestPct=pct;
-    if(perfect){state.games.perfectMath++;confetti(120)}
-  }else if(perfect)confetti(80);
-  state.mathLog.push({date:new Date().toISOString(),mode:r.mode,score:r.score,total:r.total,seconds});
-  if(state.mathLog.length>300)state.mathLog=state.mathLog.slice(-300);
-  persist();render();checkNewBadges();
-}
-$('#btn-math').addEventListener('click',startMath);
-
 /* ================= games: gallop! ================= */
 const jc=$('#jump-canvas'),jctx=jc.getContext('2d');
 let jump=null,jumpRaf=null;
@@ -2394,6 +2279,216 @@ jc.addEventListener('pointerdown',e=>{e.preventDefault();jumpInput()});
 document.addEventListener('keydown',e=>{
   if(e.code==='Space'&&$('#dlg-jump').open){e.preventDefault();jumpInput()}
 });
+
+/* ================= games: math trot ================= */
+const MATH_TABLES=[2,3,4,5,6,7,8,9,10,11,12];
+const MATH_MODES=[                              // the four gaits of math
+  {id:'mul',sym:'×',name:'Times'},
+  {id:'div',sym:'÷',name:'Divide'},
+  {id:'add',sym:'+',name:'Add'},
+  {id:'sub',sym:'−',name:'Minus'}
+];
+let math=null;                                  // the round being ridden right now
+let mathSetup={mode:'mul',table:0};             // last picked settings (0 = mix)
+const mathKey=(mode,a,k)=>`${mode}:${a}x${k}`;
+const mathModeTxt=m=>(MATH_MODES.find(x=>x.id===m)||MATH_MODES[0]).sym;
+
+/* Picking the "4s" means: ×4 facts, ÷4 facts, +4 facts, or −4 facts —
+   every mode is the same 12-card trot, just a different gait. */
+function mathCard(mode,a,k){
+  if(mode==='div')return {q:`${a*k} ÷ ${a}`,ans:k,key:mathKey('div',a,k)};
+  if(mode==='add')return {q:`${a} + ${k}`,ans:a+k,key:mathKey('add',a,k)};
+  if(mode==='sub')return {q:`${a+k} − ${a}`,ans:k,key:mathKey('sub',a,k)};
+  return {q:`${a} × ${k}`,ans:a*k,key:mathKey('mul',a,k)};
+}
+function mathDeck(mode,table){
+  let pairs;
+  if(table)pairs=shuffle([1,2,3,4,5,6,7,8,9,10,11,12].map(k=>[table,k]));
+  else{
+    const all=[];
+    MATH_TABLES.forEach(a=>{for(let k=1;k<=12;k++)all.push([a,k])});
+    pairs=shuffle(all).slice(0,12);
+  }
+  return pairs.map(([a,k])=>mathCard(mode,a,k));
+}
+
+/* Coach Clover looks at every fact ever answered and picks what to practice next:
+   1) a table that's been shaky (under 90% right), else 2) something brand new,
+   else 3) the table that hasn't been ridden in the longest time. */
+function mathSuggest(){
+  const facts=state.math.facts,combos=[];
+  MATH_MODES.forEach(({id:mode})=>MATH_TABLES.forEach(table=>{
+    let r=0,w=0,last=0;
+    for(let k=1;k<=12;k++){
+      const f=facts[mathKey(mode,table,k)];
+      if(f){r+=f.r||0;w+=f.w||0;last=Math.max(last,f.last||0)}
+    }
+    combos.push({mode,table,r,w,last,tries:r+w});
+  }));
+  const label=c=>`the ${mathModeTxt(c.mode)} ${c.table}s`;
+  const played=combos.filter(c=>c.tries>0);
+  if(!played.length)return {mode:'add',table:2,text:'start with the + 2s — an easy trot to warm up!'};
+  const shaky=played.filter(c=>c.w>0&&c.r/c.tries<0.9).sort((a,b)=>a.r/a.tries-b.r/b.tries)[0];
+  if(shaky)return {mode:shaky.mode,table:shaky.table,text:`${label(shaky)} could use a little more hay — practice those next!`};
+  const modeRank=m=>MATH_MODES.findIndex(x=>x.id===m);
+  const fresh=combos.filter(c=>!c.tries).sort((a,b)=>a.mode===b.mode?a.table-b.table:modeRank(a.mode)-modeRank(b.mode))[0];
+  if(fresh)return {mode:fresh.mode,table:fresh.table,text:`time to try something new: ${label(fresh)}!`};
+  const rusty=played.sort((a,b)=>a.last-b.last)[0];
+  return {mode:rusty.mode,table:rusty.table,text:`you're a star ⭐ — give ${label(rusty)} a fresh canter to keep them shiny!`};
+}
+
+const mathWhen=ts=>{const d=new Date(ts);return `${d.toLocaleDateString(undefined,{month:'short',day:'numeric'})} · ${d.toLocaleTimeString([],{hour:'numeric',minute:'2-digit'})}`};
+
+function startMath(){
+  math=null;
+  renderMathSetup();
+  $('#dlg-math').showModal();
+}
+function renderMathSetup(){
+  const s=mathSetup,tip=mathSuggest();
+  const recent=state.math.sessions.slice(-3).reverse();
+  const carrots=Object.values(state.math.facts).reduce((a,f)=>a+(f.r||0),0);
+  $('#math-body').innerHTML=`
+    <p class="horse-meta">Pick your practice, then trot through 12 cards. Miss one? It comes back for a retake lap until you've rounded them all up! 🤠</p>
+    ${carrots?`<p class="chips"><span class="chip green">🥕 ${carrots} carrot${carrots===1?'':'s'} munched</span><span class="chip gold">🏇 ${state.math.sessions.length} round${state.math.sessions.length===1?'':'s'} ridden</span></p>`:''}
+    <div class="math-toggle" role="group" aria-label="fact type">
+      ${MATH_MODES.map(x=>`<button type="button" data-mode="${x.id}" class="${s.mode===x.id?'active':''}">${x.sym} ${x.name}</button>`).join('')}
+    </div>
+    <div class="math-tables">
+      <button type="button" data-table="0" class="${!s.table?'active':''}">Mix 🌾</button>
+      ${MATH_TABLES.map(t=>`<button type="button" data-table="${t}" class="${s.table===t?'active':''}">${t}s</button>`).join('')}
+    </div>
+    <button type="button" class="coach-tip" id="math-take-tip" title="Tap to take Coach's pick">🐴 <span><b>Coach Clover says:</b> ${tip.text}</span></button>
+    ${recent.length?`<p class="quiz-progress" style="margin-top:14px">Your last rounds</p>
+      <div class="math-history">${recent.map(x=>`<div class="math-hist-row"><span>${mathModeTxt(x.mode)} ${x.table?x.table+'s':'Mix'}</span><b>${x.firstTry}/${x.total} first try${x.laps>1?` · ${x.laps-1} retake${x.laps===2?'':'s'}`:''}</b><span>${mathWhen(x.ts)}</span></div>`).join('')}</div>`:''}
+    <div class="dlg-actions">
+      <button class="ghost-btn" type="button" data-close>Not now</button>
+      <button class="cta" id="math-start" type="button">Saddle up! 🏇</button>
+    </div>`;
+  $('#math-body').querySelectorAll('[data-mode]').forEach(b=>b.addEventListener('click',()=>{mathSetup.mode=b.dataset.mode;renderMathSetup()}));
+  $('#math-body').querySelectorAll('[data-table]').forEach(b=>b.addEventListener('click',()=>{mathSetup.table=+b.dataset.table;renderMathSetup()}));
+  $('#math-take-tip').addEventListener('click',()=>{mathSetup={mode:tip.mode,table:tip.table};renderMathSetup()});
+  $('#math-body').querySelector('[data-close]').addEventListener('click',()=>$('#dlg-math').close());
+  $('#math-start').addEventListener('click',beginMathRound);
+}
+
+function beginMathRound(){
+  const deck=mathDeck(mathSetup.mode,mathSetup.table);
+  math={mode:mathSetup.mode,table:mathSetup.table,deck,idx:0,lap:1,missed:[],firstTry:0,total:deck.length,startTs:Date.now(),lock:false};
+  renderMathCard();
+}
+function mathTrailHTML(){
+  const m=math;
+  let out='<div class="math-trail" aria-hidden="true">';
+  for(let i=0;i<m.deck.length;i++){
+    if(i<m.idx)out+=`<i class="done">${m.deck[i]._got?'🥕':'💨'}</i>`;
+    else if(i===m.idx)out+='<i class="pony">🐴</i>';
+    else out+='<i>·</i>';
+  }
+  return out+'<span class="barn">🏡</span></div>';
+}
+/* four tap-able answer choices: the right one plus three near-miss distractors,
+   shuffled so nothing is highlighted until she picks. */
+function mathOptions(ans){
+  const ri=n=>1+Math.floor(Math.random()*n);
+  const opts=new Set([ans]);
+  let guard=0;
+  while(opts.size<4&&guard++<80){
+    const d=ans+(Math.random()<.5?-1:1)*ri(Math.max(3,Math.round(ans*.25)+1));
+    if(d>=0&&d!==ans)opts.add(d);
+  }
+  while(opts.size<4)opts.add(ans+opts.size);
+  return shuffle([...opts]);
+}
+function renderMathCard(){
+  const m=math,card=m.deck[m.idx];
+  m.lock=false;
+  const opts=mathOptions(card.ans);
+  $('#math-body').innerHTML=`
+    <p class="quiz-progress">${m.lap>1?`Retake lap ${m.lap-1} · `:''}Card ${m.idx+1} of ${m.deck.length}</p>
+    ${mathTrailHTML()}
+    <p class="math-q">${card.q} = <span class="math-blank">?</span></p>
+    <div class="math-opts">${opts.map(o=>`<button class="quiz-opt" type="button" data-val="${o}">${o}</button>`).join('')}</div>
+    <div id="math-after"></div>`;
+  $('#math-body').querySelectorAll('[data-val]').forEach(btn=>btn.addEventListener('click',()=>mathAnswer(parseInt(btn.dataset.val,10),btn)));
+}
+function mathAnswer(val,btn){
+  const m=math,card=m.deck[m.idx];
+  if(m.lock)return;m.lock=true;
+  const ok=val===card.ans;
+  card._got=ok;
+  const f=state.math.facts[card.key]||(state.math.facts[card.key]={r:0,w:0,last:0});
+  if(ok)f.r++;else f.w++;
+  f.last=Date.now();
+  if(ok&&m.lap===1)m.firstTry++;
+  if(!ok)m.missed.push(card);
+  // lock every choice, light up the correct one green and a wrong pick red
+  $('#math-body').querySelectorAll('[data-val]').forEach(x=>{
+    x.disabled=true;
+    if(parseInt(x.dataset.val,10)===card.ans)x.classList.add('right');
+    else if(x===btn)x.classList.add('wrong');
+  });
+  if(ok){
+    $('#math-after').innerHTML=`<p class="quiz-explain">🎉 Yes! <b>${card.q} = ${card.ans}</b> — crunch, crunch! 🥕</p>`;
+    confetti(15);
+    setTimeout(()=>{if(math===m)mathNext()},900);
+  }else{
+    // hold on the correct answer for a beat so she can take it in, then trot on
+    $('#math-after').innerHTML=`<p class="quiz-explain">🙊 Not quite — <b>${card.q} = ${card.ans}</b>. That card trots back for the retake lap!</p>`;
+    setTimeout(()=>{if(math===m)mathNext()},2000);
+  }
+}
+function mathNext(){
+  const m=math;
+  m.idx++;
+  if(m.idx<m.deck.length)renderMathCard();
+  else if(m.missed.length)renderMathLapEnd();
+  else endMathRound();
+}
+function renderMathLapEnd(){
+  const m=math,n=m.missed.length;
+  $('#math-body').innerHTML=`<div class="quiz-end">
+    <div class="big">🤠</div>
+    <h3>Round-up time!</h3>
+    <p class="horse-meta">${n} card${n===1?'':'s'} got away. Trot back and catch ${n===1?'it':'them'} — that's how the facts stick!</p>
+    <div class="dlg-actions" style="justify-content:center">
+      <button class="cta" id="math-retake" type="button">Retake lap ${m.lap} 🔁</button>
+    </div></div>`;
+  $('#math-retake').addEventListener('click',()=>{
+    m.deck=shuffle(m.missed);m.missed=[];m.idx=0;m.lap++;
+    m.deck.forEach(c=>delete c._got);
+    renderMathCard();
+  });
+}
+function endMathRound(){
+  const m=math;
+  const secs=Math.max(1,Math.round((Date.now()-m.startTs)/1000));
+  const perfect=m.firstTry===m.total;
+  // fastest-ever PERFECT ride of this exact practice (mode + table)?
+  const prevBest=state.math.sessions
+    .filter(x=>x.mode===m.mode&&x.table===m.table&&x.firstTry===x.total)
+    .reduce((a,x)=>Math.min(a,x.secs||Infinity),Infinity);
+  const newBest=perfect&&secs<prevBest;
+  state.math.sessions.push({id:uid(),ts:Date.now(),date:todayStr(),mode:m.mode,table:m.table,total:m.total,firstTry:m.firstTry,laps:m.lap,secs});
+  const tip=mathSuggest();
+  const timeTxt=secs>=60?`${Math.floor(secs/60)}m ${secs%60}s`:`${secs}s`;
+  $('#math-body').innerHTML=`<div class="quiz-end">
+    <div class="big">${perfect?'🏆':'🌟'}</div>
+    <h3>${perfect?'PERFECT trot!':'All cards rounded up!'}</h3>
+    <p class="horse-meta">${mathModeTxt(m.mode)} ${m.table?m.table+'s':'Mix'} · ${m.firstTry} of ${m.total} on the first try${m.lap>1?` · ${m.lap-1} retake lap${m.lap===2?'':'s'}`:''} · ${timeTxt}</p>
+    ${newBest?`<p class="chips" style="justify-content:center"><span class="chip gold">⚡ New best time for ${mathModeTxt(m.mode)} ${m.table?m.table+'s':'Mix'}${isFinite(prevBest)?` — beat ${prevBest}s!`:'!'}</span></p>`:''}
+    <p class="horse-meta">${perfect?'Your pony is stuffed with carrots and SO proud of you! 🥕🐴':'Every missed card got caught on the retake — that’s how champions learn! 💪🐴'}</p>
+    <div class="coach-tip">🐴 <span><b>Next up:</b> ${tip.text}</span></div>
+    <div class="dlg-actions" style="justify-content:center">
+      <button class="ghost-btn" data-close type="button">Done</button>
+      <button class="cta" id="math-again" type="button">Ride again! 🔄</button>
+    </div></div>`;
+  $('#math-body').querySelector('[data-close]').addEventListener('click',()=>$('#dlg-math').close());
+  $('#math-again').addEventListener('click',renderMathSetup);
+  confetti(perfect?140:80);
+  persist();render();checkNewBadges();
+}
+$('#btn-math').addEventListener('click',startMath);
 
 /* ================= horse profile page ================= */
 let currentHorsePage=null;

@@ -21,7 +21,7 @@
  * What it stores:
  *   - "_data" (hidden tab): the app's full save file, chunked across
  *     cells. This is the source of truth — don't edit it.
- *   - "Horses 🐴", "Rides 📖", "Goals 🎯", "Wishlist 🌠": readable
+ *   - "Horses 🐴", "Rides 📖", "Goals 🎯", "Wishlist 🌠", "Math 🥕": readable
  *     copies rewritten on every save, so you can browse the barn
  *     right in Google Sheets. Edits here are overwritten — they're a
  *     view, not an input.
@@ -119,24 +119,28 @@ function writeReadableTabs_(ss, d) {
     (d.events || []).slice().sort(function (a, b) { return String(a.date).localeCompare(String(b.date)); })
       .map(function (e) { return [e.date, e.time || '', e.title, EVENTS[e.type] || e.type, REPEATS[e.repeat] || '', e.until || '']; }));
 
-  fill_(ss, 'Math 🥕',
-    ['Date', 'Mode', 'Score', 'Out of', 'Perfect', 'Time'],
-    (d.mathLog || []).slice().reverse().map(function (m) {
-      var signs = { mul: '×', div: '÷', add: '+', sub: '−' };
-      var mm = String(m.mode).match(/^(mul|div|add|sub)-(all|\d+)$/);
-      var mode = m.mode === 'retake' ? 'Tricky ones 🔁'
-        : mm ? (mm[2] === 'all' ? signs[mm[1]] + ' mixed 🎲' : signs[mm[1]] + mm[2] + ' facts')
-        : m.mode === 'facts' ? 'Math facts 🥕'
-        : (String(m.mode).indexOf('facts-') === 0 ? '×' + String(m.mode).slice(6) + ' facts' : String(m.mode));
-      var t = Math.floor((m.seconds || 0) / 60) + 'm ' + ((m.seconds || 0) % 60) + 's';
-      return [String(m.date).slice(0, 10) + ' ' + String(m.date).slice(11, 16), mode, m.score, m.total, m.score === m.total ? '⭐' : '', t];
-    }));
-
   fill_(ss, 'Wishlist 🌠',
     ['Wish', 'Kind', 'Why', 'Came true', 'Date'],
     (d.wishes || []).map(function (w) {
       return [w.text, w.type, w.why, w.granted ? 'YES ⭐' : 'not yet', w.grantedDate || ''];
     }));
+
+  // Math Trot rounds, plus rows from the old Carrot Count log so no history is lost.
+  var MATH_GAMES = { mul: 'Multiplication ×', div: 'Division ÷', add: 'Addition +', sub: 'Subtraction −' };
+  var mathRows = (((d.math || {}).sessions) || []).map(function (m) {
+    return { ts: m.ts || 0, row: [m.ts ? new Date(m.ts) : (m.date || ''), MATH_GAMES[m.mode] || m.mode, m.table ? m.table + 's' : 'Mix', m.firstTry + ' / ' + m.total, (m.laps || 1) - 1, m.secs || ''] };
+  }).concat((d.mathLog || []).map(function (m) {
+    var signs = { mul: '×', div: '÷', add: '+', sub: '−' };
+    var mm = String(m.mode).match(/^(mul|div|add|sub)-(all|\d+)$/);
+    var mode = m.mode === 'retake' ? 'Tricky ones 🔁'
+      : mm ? (mm[2] === 'all' ? signs[mm[1]] + ' mixed 🎲' : signs[mm[1]] + mm[2] + ' facts')
+      : String(m.mode);
+    return { ts: new Date(m.date).getTime() || 0, row: [String(m.date).slice(0, 10) + ' ' + String(m.date).slice(11, 16), 'Carrot Count · ' + mode, '', m.score + ' / ' + m.total, '', m.seconds || ''] };
+  }));
+  mathRows.sort(function (a, b) { return b.ts - a.ts; });
+  fill_(ss, 'Math 🥕',
+    ['When', 'Game', 'Table', 'First try', 'Retake laps', 'Seconds'],
+    mathRows.map(function (r) { return r.row; }));
 }
 
 function fill_(ss, name, header, rows) {
