@@ -7,9 +7,10 @@ Hoofprints is a single-file web app: everything lives in `index.html`. It works 
 ## Features
 
 - **My Stable** — profile cards for every horse she's ridden: photo, breed, size (pony/horse/mini/🦄 unicorn), coat color, personality chips, favorite treat, and notes
+- **The paddock** — an illustrated barn scene at the top of the stable where every horse appears as a little figure matching its coat, size, and unicorn-ness, with its name; tap one to open its page
 - **Horse pages** — tap any horse for its own full page: hero profile, "friends since" counter, per-horse stats, activity chart, care history, best moments, ride timeline, and a photo wall
 - **Ride Journal** — log every ride: activity, minutes, mood (😴 → 🦄 MAGICAL), weather, the best moment, and a photo from the day
-- **Calendar** — month view of all rides, plus a planner for what's coming up (lessons, shows, farrier visits, pony camp) with countdown chips
+- **Calendar** — month view of all rides, plus a planner for what's coming up (lessons, shows, farrier visits, pony camp) with countdown chips and repeating events — weekly, every 2 weeks, or monthly, with an optional end date
 - **Stats** — riding time charts for the last 8 weeks, weekly riding streaks 🔥, activity breakdown, horse leaderboard, and a mood-o-meter
 - **Care log** — per-horse records of farrier, vet, dentist, vaccine, worming, and spa days
 - **My Goals** — riding goals with a practice progress bar, a big "I practiced! +1" button, and a confetti party when a goal is crushed
@@ -55,9 +56,11 @@ Hoofprints works fully offline, but you can optionally back the whole barn with 
 
 **What you get:**
 - Every change auto-saves to the Sheet a couple of seconds later
-- Open the app on a new device, enter the same URL + secret, and the barn loads automatically
+- Open the app on a new device, enter the same URL + secret, and the barn loads automatically — or easier: on an already-connected device open ☁️ Sync → **🔗 Copy setup link** and just open that link on the new device (share it privately; it contains the URL and secret)
 - The Sheet gets human-readable tabs — **Horses 🐴, Rides 📖, Goals 🎯, Care 🩺, Calendar 🗓️, Wishlist 🌠, Math 🥕** — rewritten on every save (the hidden `_data` tab is the real save file; don't edit it)
 - The secret word keeps random strangers out; treat the URL + secret like a house key
+
+**Barn lock 🔒 (optional):** the Lock button in the app sets a per-device passcode. With it on, the app asks for the passcode every time it opens, and the ☁️ Sync settings can't be viewed or changed without it. It's a deterrent lock, not encryption — and if the passcode is forgotten, clearing the site's data in the browser removes the lock (cloud sync restores the barn).
 
 If sync isn't set up, everything keeps working exactly as before — saved on the device, with file backup buttons in the footer.
 

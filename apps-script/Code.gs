@@ -88,7 +88,7 @@ function writeReadableTabs_(ss, d) {
   fill_(ss, 'Horses 🐴',
     ['Name', 'Breed', 'Size', 'Coat', 'Personality', 'Favorite treat', 'Notes', 'Has photo'],
     (d.horses || []).map(function (h) {
-      return [h.name, h.breed, h.size, h.coat, (h.traits || []).join(', '), h.treat, h.notes, h.photo ? 'yes' : ''];
+      return [h.name, h.breed, h.size, h.coat, (h.traits || []).join(', '), (h.treats || [h.treat]).filter(Boolean).join(', '), h.notes, h.photo ? 'yes' : ''];
     }));
 
   fill_(ss, 'Rides 📖',
@@ -113,10 +113,11 @@ function writeReadableTabs_(ss, d) {
   careRows.sort(function (a, b) { return String(b[0]).localeCompare(String(a[0])); });
   fill_(ss, 'Care 🩺', ['Date', 'Horse', 'What', 'Note'], careRows);
 
+  var REPEATS = { weekly: 'Every week 🔁', biweekly: 'Every 2 weeks 🔁', monthly: 'Every month 🔁' };
   fill_(ss, 'Calendar 🗓️',
-    ['Date', 'What', 'Kind'],
+    ['Starts', 'Time', 'What', 'Kind', 'Repeats', 'Until'],
     (d.events || []).slice().sort(function (a, b) { return String(a.date).localeCompare(String(b.date)); })
-      .map(function (e) { return [e.date, e.title, EVENTS[e.type] || e.type]; }));
+      .map(function (e) { return [e.date, e.time || '', e.title, EVENTS[e.type] || e.type, REPEATS[e.repeat] || '', e.until || '']; }));
 
   fill_(ss, 'Wishlist 🌠',
     ['Wish', 'Kind', 'Why', 'Came true', 'Date'],
@@ -124,13 +125,22 @@ function writeReadableTabs_(ss, d) {
       return [w.text, w.type, w.why, w.granted ? 'YES ⭐' : 'not yet', w.grantedDate || ''];
     }));
 
+  // Math Trot rounds, plus rows from the old Carrot Count log so no history is lost.
   var MATH_GAMES = { mul: 'Multiplication ×', div: 'Division ÷', add: 'Addition +', sub: 'Subtraction −' };
+  var mathRows = (((d.math || {}).sessions) || []).map(function (m) {
+    return { ts: m.ts || 0, row: [m.ts ? new Date(m.ts) : (m.date || ''), MATH_GAMES[m.mode] || m.mode, m.table ? m.table + 's' : 'Mix', m.firstTry + ' / ' + m.total, (m.laps || 1) - 1, m.secs || ''] };
+  }).concat((d.mathLog || []).map(function (m) {
+    var signs = { mul: '×', div: '÷', add: '+', sub: '−' };
+    var mm = String(m.mode).match(/^(mul|div|add|sub)-(all|\d+)$/);
+    var mode = m.mode === 'retake' ? 'Tricky ones 🔁'
+      : mm ? (mm[2] === 'all' ? signs[mm[1]] + ' mixed 🎲' : signs[mm[1]] + mm[2] + ' facts')
+      : String(m.mode);
+    return { ts: new Date(m.date).getTime() || 0, row: [String(m.date).slice(0, 10) + ' ' + String(m.date).slice(11, 16), 'Carrot Count · ' + mode, '', m.score + ' / ' + m.total, '', m.seconds || ''] };
+  }));
+  mathRows.sort(function (a, b) { return b.ts - a.ts; });
   fill_(ss, 'Math 🥕',
     ['When', 'Game', 'Table', 'First try', 'Retake laps', 'Seconds'],
-    (((d.math || {}).sessions) || []).slice().sort(function (a, b) { return (b.ts || 0) - (a.ts || 0); })
-      .map(function (m) {
-        return [m.ts ? new Date(m.ts) : (m.date || ''), MATH_GAMES[m.mode] || m.mode, m.table ? m.table + 's' : 'Mix', m.firstTry + ' / ' + m.total, (m.laps || 1) - 1, m.secs || ''];
-      }));
+    mathRows.map(function (r) { return r.row; }));
 }
 
 function fill_(ss, name, header, rows) {
