@@ -65,3 +65,7 @@ Hoofprints works fully offline, but you can optionally back the whole barn with 
 If sync isn't set up, everything keeps working exactly as before — saved on the device, with file backup buttons in the footer.
 
 Made with 💗 and hay.
+
+---
+
+Paddock horse silhouette adapted from [Horseicon.svg](https://commons.wikimedia.org/wiki/File:Horseicon.svg) (Wikimedia Commons, public domain).
