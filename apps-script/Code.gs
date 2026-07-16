@@ -85,10 +85,13 @@ function writeReadableTabs_(ss, d) {
   var CARE = { farrier: 'Farrier 🛠️', vet: 'Vet 🩺', dentist: 'Dentist 🦷', vaccine: 'Vaccine 💉', worming: 'Worming 💊', spa: 'Spa day 🛁', other: 'Other 📋' };
   var EVENTS = { lesson: 'Lesson 🎓', show: 'Show 🏆', farrier: 'Farrier 🛠️', vet: 'Vet 🩺', camp: 'Camp ⛺', party: 'Fun 🎈', other: 'Other 📌' };
 
+  var loggedRides = {};
+  (d.rides || []).forEach(function (r) { loggedRides[r.horseId] = (loggedRides[r.horseId] || 0) + 1; });
   fill_(ss, 'Horses 🐴',
-    ['Name', 'Breed', 'Size', 'Coat', 'Personality', 'Favorite treat', 'Notes', 'Has photo'],
+    ['Name', 'Breed', 'Size', 'Coat', 'Personality', 'Favorite treat', 'Notes', 'Has photo', 'Past rides', 'Total rides'],
     (d.horses || []).map(function (h) {
-      return [h.name, h.breed, h.size, h.coat, (h.traits || []).join(', '), (h.treats || [h.treat]).filter(Boolean).join(', '), h.notes, h.photo ? 'yes' : ''];
+      var past = Math.max(0, Math.floor(Number(h.pastRides)) || 0);
+      return [h.name, h.breed, h.size, h.coat, (h.traits || []).join(', '), (h.treats || [h.treat]).filter(Boolean).join(', '), h.notes, h.photo ? 'yes' : '', past || '', (loggedRides[h.id] || 0) + past];
     }));
 
   fill_(ss, 'Rides 📖',

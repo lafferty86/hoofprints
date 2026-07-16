@@ -356,6 +356,7 @@ nav.tabs{display:flex;flex-direction:column;gap:7px;position:sticky;top:14px}
 .chip.gold{background:var(--gold-soft);color:var(--gold-deep)}
 .chip.sky{background:var(--sky-soft);color:var(--sky-deep)}
 .horse-meta{font-size:.9rem;color:var(--ink-soft);margin:0}
+.linklike{border:none;background:none;padding:0;color:var(--rose-deep);font-weight:800;font-size:inherit;cursor:pointer;text-decoration:underline}
 .horse-meta b{color:var(--ink)}
 .card-actions{display:flex;gap:6px;margin-top:auto;padding-top:6px}
 .mini-btn{
@@ -1131,6 +1132,22 @@ footer .data-btns{display:flex;gap:10px;justify-content:center;margin-bottom:10p
   </div>
 </dialog>
 
+<!-- PAST RIDES DIALOG -->
+<dialog id="dlg-past">
+  <form class="dlg-inner" id="form-past" method="dialog">
+    <h2 id="past-title">Log past rides 🗓️</h2>
+    <p class="horse-meta">For a horse you don't ride anymore — add all the rides you shared in one number. They count toward your ride totals (the day-by-day charts still only use rides you log one at a time).</p>
+    <div class="field">
+      <label for="past-count">Total rides together</label>
+      <input type="number" id="past-count" min="0" max="100000" step="1" inputmode="numeric" placeholder="0">
+    </div>
+    <div class="dlg-actions">
+      <button type="button" class="ghost-btn" data-close>Never mind</button>
+      <button type="submit" class="cta">Save 🐴</button>
+    </div>
+  </form>
+</dialog>
+
 <!-- EVENT DIALOG -->
 <dialog id="dlg-event">
   <form class="dlg-inner" id="form-event" method="dialog">
@@ -1362,6 +1379,7 @@ function normalize(s){
   s.horses.forEach(h=>{
     h.care=Array.isArray(h.care)?h.care:[];
     if(!Array.isArray(h.treats))h.treats=(typeof h.treat==='string'&&h.treat)?[h.treat]:[];
+    h.pastRides=Math.max(0,Math.floor(Number(h.pastRides))||0); // manually-logged rides for retired horses
   });
   return s;
 }
@@ -1441,6 +1459,9 @@ function checkNewBadges(){
 function coatBG(id){const c=COATS.find(c=>c.id===id)||COATS[0];return c.bg}
 function horseById(id){return state.horses.find(h=>h.id===id)}
 function rideCount(id){return state.rides.filter(r=>r.horseId===id).length}
+/* rides shown for a horse = ones logged day-by-day + any manually-added past rides */
+function totalRides(h){return (h?rideCount(h.id):0)+(h&&h.pastRides>0?h.pastRides:0)}
+function pastRidesTotal(){return state.horses.reduce((a,h)=>a+(h.pastRides>0?h.pastRides:0),0)}
 function avatarHTML(h){
   if(h&&h.photo)return `<div class="avatar has-photo" style="background-image:url(${h.photo})"></div>`;
   return `<div class="avatar" style="background:${h?coatBG(h.coat):'var(--card-2)'}">${h?(SIZE_EMOJI[h.size]||'🐴'):'🐴'}</div>`;
@@ -1449,7 +1470,7 @@ function avatarHTML(h){
 function render(){
   // stats
   $('#stat-horses').textContent=state.horses.length;
-  $('#stat-rides').textContent=state.rides.length;
+  $('#stat-rides').textContent=state.rides.length+pastRidesTotal();
   const mins=state.rides.reduce((a,r)=>a+r.minutes,0);
   $('#stat-hours').textContent=(mins/60).toFixed(mins&&mins<600?1:0).replace(/\.0$/,'');
   $('#stat-badges').textContent=earnedBadges().length;
@@ -1689,7 +1710,7 @@ function renderStable(){
     return;
   }
   g.innerHTML=state.horses.map(h=>{
-    const n=rideCount(h.id);
+    const n=totalRides(h);
     return `<article class="card horse-card">
       <div class="horse-head" data-open="${h.id}" role="button" tabindex="0" title="Open ${esc(h.name)}'s page">
         ${avatarHTML(h)}
@@ -2552,22 +2573,24 @@ function renderHorsePage(){
       ${h.traits.length?`<div class="chips">${h.traits.map(t=>`<span class="chip">${esc(t)}</span>`).join('')}</div>`:''}
       <div class="hero-facts">
         ${(h.treats||[]).length?`<p>Loves <b>${esc(h.treats.join(', '))}</b></p>`:''}
-        ${first?`<p>Friends since <b>${new Date(first+'T12:00:00').toLocaleDateString(undefined,{day:'numeric',month:'long',year:'numeric'})}</b> — that's <b>${daysFriends}</b> day${daysFriends===1?'':'s'} of friendship 💗</p>`:'<p>No rides together yet — the adventure is about to begin! ✨</p>'}
+        ${first?`<p>Friends since <b>${new Date(first+'T12:00:00').toLocaleDateString(undefined,{day:'numeric',month:'long',year:'numeric'})}</b> — that's <b>${daysFriends}</b> day${daysFriends===1?'':'s'} of friendship 💗</p>`:(h.pastRides>0?`<p>You've logged <b>${h.pastRides}</b> past ride${h.pastRides===1?'':'s'} together 💗</p>`:'<p>No rides together yet — the adventure is about to begin! ✨</p>')}
       </div>
       ${h.notes?`<div class="horse-note">${esc(h.notes)}</div>`:''}
       <div class="horse-actions">
         <button class="cta green" style="font-size:1rem;padding:10px 18px" id="horse-log-ride">🐎 Log a ride</button>
         <button class="mini-btn" id="horse-edit">✏️ Edit</button>
         <button class="mini-btn" id="horse-care">🩺 Add a care day</button>
+        <button class="mini-btn" id="horse-past">🗓️ Log past rides</button>
       </div>
     </div>
   </div>
   <div class="stats horse-section">
-    <div class="stat"><b>${rides.length}</b><span>Rides together</span></div>
+    <div class="stat"><b>${totalRides(h)}</b><span>Rides together</span></div>
     <div class="stat"><b>${mins}</b><span>Minutes</span></div>
     <div class="stat"><b>${magic}</b><span>Magical rides 🦄</span></div>
     <div class="stat"><b>${care.length}</b><span>Care days</span></div>
   </div>
+  ${h.pastRides>0?`<p class="horse-meta horse-section" style="margin-top:-4px">🗓️ Includes <b>${h.pastRides}</b> past ride${h.pastRides===1?'':'s'} you added by hand. <button class="linklike" id="horse-past-edit">Change</button></p>`:''}
   <div class="two-col">
     <div class="card">
       <h3 class="horse-section" style="margin-top:0">🎪 What we do together</h3>
@@ -2590,7 +2613,7 @@ function renderHorsePage(){
     ${rides.length?rides.slice(0,10).map(r=>{
       const a=ACTIVITIES.find(x=>x.id===r.activity)||ACTIVITIES[0];
       return `<div class="mini-ride"><span class="em">${a.emoji}</span><span class="what"><b>${a.name} · ${r.minutes} min</b><span>${new Date(r.date+'T12:00:00').toLocaleDateString(undefined,{weekday:'short',day:'numeric',month:'short'})}${r.weather&&WEATHERS[r.weather]?' · '+WEATHERS[r.weather].emoji:''}</span></span><span class="mood">${MOODS[r.mood]||''}</span></div>`;
-    }).join('')+(rides.length>10?`<p class="horse-meta" style="margin-top:8px">…and ${rides.length-10} more in the Ride Journal</p>`:''):'<p class="horse-meta">The first ride is the start of the story ✨</p>'}
+    }).join('')+(rides.length>10?`<p class="horse-meta" style="margin-top:8px">…and ${rides.length-10} more in the Ride Journal</p>`:''):(h.pastRides>0?`<p class="horse-meta">🗓️ <b>${h.pastRides}</b> past ride${h.pastRides===1?'':'s'} logged by hand — the day-by-day list is just for new rides.</p>`:'<p class="horse-meta">The first ride is the start of the story ✨</p>')}
   </div>
   ${photos.length?`<div class="card horse-section">
     <h3 style="margin-top:0">📸 Photo wall</h3>
@@ -2601,6 +2624,8 @@ function renderHorsePage(){
   $('#horse-log-ride').addEventListener('click',()=>openRideDialog(h.id));
   $('#horse-edit').addEventListener('click',()=>openHorseDialog(h.id));
   $('#horse-care').addEventListener('click',()=>openCareDialog(h.id));
+  $('#horse-past').addEventListener('click',()=>openPastDialog(h.id));
+  const pe=$('#horse-past-edit');if(pe)pe.addEventListener('click',()=>openPastDialog(h.id));
 }
 
 /* ================= stats ================= */
@@ -2804,6 +2829,25 @@ $('#care-add').addEventListener('click',()=>{
   $('#care-note').value='';
   persist();renderCareList();render();checkNewBadges();
   toast(`Care day added for ${h.name} 💕`);
+});
+
+/* ---- past rides: a manual ride count for horses she no longer rides ---- */
+let pastHorseId=null;
+function openPastDialog(id){
+  const h=horseById(id);
+  if(!h)return;
+  pastHorseId=id;
+  $('#past-title').textContent=`Past rides with ${h.name} 🗓️`;
+  $('#past-count').value=h.pastRides>0?h.pastRides:'';
+  $('#dlg-past').showModal();
+  setTimeout(()=>{$('#past-count').focus();$('#past-count').select()},50);
+}
+$('#form-past').addEventListener('submit',()=>{
+  const h=horseById(pastHorseId);
+  if(!h)return;
+  h.pastRides=Math.max(0,Math.min(100000,Math.floor(Number($('#past-count').value)||0)));
+  persist();render();checkNewBadges();
+  toast(h.pastRides?`Logged ${h.pastRides} past ride${h.pastRides===1?'':'s'} with ${h.name} 🐴`:`Past rides cleared for ${h.name}`);
 });
 
 /* ================= barn lock ================= */
